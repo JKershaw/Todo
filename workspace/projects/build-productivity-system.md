@@ -60,8 +60,8 @@ Build tools that amplify human thinking without replacing human judgment.
 - [x] Build server process management with clean shutdown
 - [x] Fix Level 0 task parsing in API endpoints
 - [x] Update all project documentation to reflect current reality
-- [ ] Add AI task relationship suggestions for intelligent coordination
-- [ ] Implement task completion tracking in dashboard interface
+- [x] Add AI task relationship suggestions for intelligent coordination
+- [x] Implement task completion tracking in dashboard interface
 
 ## Completed - **PROJECT 95% COMPLETE** 🎉
 - [x] Define system philosophy

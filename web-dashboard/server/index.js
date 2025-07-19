@@ -16,6 +16,7 @@ const WORKSPACE_PATH = path.join(__dirname, '../../workspace');
 
 // Serve static files
 app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.json());
 
 // API Routes
 app.get('/api/workspace', async (req, res) => {
@@ -135,6 +136,54 @@ app.get('/api/focus-flow', async (req, res) => {
   } catch (error) {
     console.error('Error generating focus flow data:', error);
     res.status(500).json({ error: 'Failed to generate focus flow data' });
+  }
+});
+
+// Task completion endpoint
+app.post('/api/tasks/complete', async (req, res) => {
+  try {
+    const { task, project, file } = req.body;
+    
+    if (!task || !project || !file) {
+      return res.status(400).json({ error: 'Missing required fields: task, project, file' });
+    }
+    
+    const filePath = path.join(WORKSPACE_PATH, 'projects', file);
+    const content = await fs.readFile(filePath, 'utf-8');
+    const lines = content.split('\n');
+    
+    // Find and mark the task as completed
+    let taskFound = false;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].includes(`- [ ] ${task}`)) {
+        lines[i] = lines[i].replace(`- [ ] ${task}`, `- [x] ${task}`);
+        taskFound = true;
+        break;
+      }
+    }
+    
+    if (!taskFound) {
+      return res.status(404).json({ error: 'Task not found in file' });
+    }
+    
+    // Write updated content back to file
+    await fs.writeFile(filePath, lines.join('\n'), 'utf-8');
+    
+    console.log(`✅ Task completed: "${task}" in ${project}`);
+    
+    // Notify all connected clients of the update
+    io.emit('task-completed', {
+      task,
+      project,
+      file,
+      timestamp: new Date().toISOString()
+    });
+    
+    res.json({ success: true, message: 'Task marked as completed' });
+    
+  } catch (error) {
+    console.error('Error completing task:', error);
+    res.status(500).json({ error: 'Failed to complete task' });
   }
 });
 

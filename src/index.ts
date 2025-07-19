@@ -15,6 +15,7 @@ import { saveCommand } from './commands/save';
 import { zoomCommand } from './commands/zoom';
 import { reflectCommand } from './commands/reflect';
 import { projectCommand } from './commands/project';
+import { coordinateCommand } from './commands/coordinate';
 
 const program = new Command();
 
@@ -74,6 +75,14 @@ program
   .option('-d, --directory <dir>', 'Workspace directory', '.')
   .action(async (action, name, options) => {
     await projectCommand(action as 'create' | 'status' | 'complete' | 'list', name, options.directory);
+  });
+
+program
+  .command('coordinate')
+  .description('Analyze task relationships and suggest intelligent coordination')
+  .option('-d, --directory <dir>', 'Workspace directory', '.')
+  .action(async (options) => {
+    await coordinateCommand(options.directory);
   });
 
 // Handle unknown commands

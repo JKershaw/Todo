@@ -55,6 +55,26 @@ export interface AIResponse {
   reasoning: string;
 }
 
+export interface TaskRelationship {
+  from_task: string;
+  to_task: string;
+  relationship_type: 'dependency' | 'enables' | 'blocks' | 'supports';
+  strength: 'weak' | 'medium' | 'strong';
+  description: string;
+}
+
+export interface AITaskAnalysis {
+  task_relationships: TaskRelationship[];
+  coordination_suggestions: string[];
+  optimization_opportunities: string[];
+  priority_adjustments: {
+    task: string;
+    current_priority: number;
+    suggested_priority: number;
+    reasoning: string;
+  }[];
+}
+
 export interface FileChange {
   file_path: string;
   change_type: 'create' | 'update' | 'delete';

@@ -49,6 +49,17 @@ class ProductivityDashboard {
       }, 500);
     });
 
+    this.socket.on('task-completed', (data) => {
+      console.log('✅ Task completed by another client:', data);
+      this.addActivityItem(
+        `Task completed: ${data.task}`,
+        this.formatTime(data.timestamp)
+      );
+      
+      // Refresh focus flow to remove completed task
+      this.loadFocusFlowData();
+    });
+
     this.socket.on('error', (error) => {
       console.error('🚨 Socket error:', error);
       this.addActivityItem('Connection error occurred', 'just now');
@@ -136,24 +147,88 @@ class ProductivityDashboard {
     }
   }
 
-  handleTaskClick(task, taskElement) {
-    // Visual feedback for task completion
-    taskElement.style.opacity = '0.7';
-    taskElement.style.borderColor = 'var(--success-color)';
+  async handleTaskClick(task, taskElement) {
+    // Prevent multiple clicks on same task
+    if (taskElement.dataset.completing) return;
+    taskElement.dataset.completing = 'true';
     
-    // Add completion indicator
-    const completionIndicator = document.createElement('div');
-    completionIndicator.innerHTML = '✅ Completed!';
-    completionIndicator.style.color = 'var(--success-color)';
-    completionIndicator.style.fontSize = '0.875rem';
-    completionIndicator.style.marginTop = '0.5rem';
-    taskElement.appendChild(completionIndicator);
-    
-    // Log activity
-    this.addActivityItem(`Completed: ${task.task}`, 'just now');
-    
-    // In a full implementation, this would update the markdown file
-    console.log('Task completed:', task);
+    try {
+      // Visual feedback - show in progress
+      taskElement.style.opacity = '0.7';
+      taskElement.style.borderColor = '#fbbf24'; // Yellow for in-progress
+      
+      // Add processing indicator
+      const processingIndicator = document.createElement('div');
+      processingIndicator.innerHTML = '⏳ Marking as complete...';
+      processingIndicator.style.color = '#fbbf24';
+      processingIndicator.style.fontSize = '0.875rem';
+      processingIndicator.style.marginTop = '0.5rem';
+      taskElement.appendChild(processingIndicator);
+      
+      // Call API to complete task
+      const response = await fetch('/api/tasks/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          task: task.task,
+          project: task.project,
+          file: task.file
+        })
+      });
+      
+      if (response.ok) {
+        // Success - update visual feedback
+        processingIndicator.innerHTML = '✅ Completed!';
+        processingIndicator.style.color = 'var(--success-color)';
+        taskElement.style.borderColor = 'var(--success-color)';
+        
+        // Log activity
+        this.addActivityItem(`Completed: ${task.task}`, 'just now');
+        
+        // Remove task from view after a brief delay
+        setTimeout(() => {
+          taskElement.style.transition = 'all 0.3s ease';
+          taskElement.style.transform = 'translateX(100%)';
+          taskElement.style.opacity = '0';
+          
+          setTimeout(() => {
+            taskElement.remove();
+            // Reload focus flow to get updated tasks
+            this.loadFocusFlowData();
+          }, 300);
+        }, 1500);
+        
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to complete task');
+      }
+      
+    } catch (error) {
+      console.error('Error completing task:', error);
+      
+      // Show error state
+      const errorIndicator = taskElement.querySelector('div:last-child');
+      if (errorIndicator) {
+        errorIndicator.innerHTML = '❌ Failed to complete';
+        errorIndicator.style.color = '#ef4444';
+      }
+      
+      // Reset visual state
+      taskElement.style.opacity = '1';
+      taskElement.style.borderColor = '#ef4444';
+      
+      this.addActivityItem(`Failed to complete: ${task.task}`, 'just now');
+      
+      // Reset after delay
+      setTimeout(() => {
+        taskElement.style.opacity = '1';
+        taskElement.style.borderColor = 'var(--border-color)';
+        if (errorIndicator) errorIndicator.remove();
+        delete taskElement.dataset.completing;
+      }, 3000);
+    }
   }
 
   async loadWorkspaceData() {

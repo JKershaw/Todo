@@ -158,6 +158,33 @@ body {
   font-size: 0.75rem;
 }
 
+/* Task completion states */
+.focus-task[data-completing="true"] {
+  cursor: not-allowed;
+}
+
+.focus-task.completing {
+  border-color: #fbbf24;
+  background: linear-gradient(135deg, var(--card-bg), #fef3c7);
+}
+
+.focus-task.completed {
+  border-color: var(--success-color);
+  background: linear-gradient(135deg, var(--card-bg), #dcfce7);
+}
+
+.focus-task.error {
+  border-color: var(--error-color);
+  background: linear-gradient(135deg, var(--card-bg), #fef2f2);
+}
+
+/* Task completion indicators */
+.task-status-indicator {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
 .zoom-out-indicator {
   margin-top: 2rem;
   opacity: 0.7;

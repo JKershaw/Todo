@@ -111,3 +111,31 @@ For project management:
    - Update related areas and goals
 
 Ensure projects maintain clear connections across all zoom levels and contribute to higher-level objectives.`;
+
+export const TASK_RELATIONSHIPS_PROMPT = `Role: Analyze task relationships and suggest intelligent coordination strategies.
+
+Analyze all tasks across projects, areas, and zoom levels to identify:
+
+1. Task Relationships:
+   - Dependencies: Tasks that must be completed before others can start
+   - Enablers: Tasks that make other tasks easier or more effective
+   - Blockers: Tasks that prevent progress on other tasks
+   - Supporters: Tasks that complement or strengthen others
+
+2. Coordination Opportunities:
+   - Tasks that could be batched together efficiently
+   - Sequences that would optimize flow and momentum
+   - Parallel work that could accelerate progress
+   - Resource conflicts that should be avoided
+
+3. Priority Optimization:
+   - Tasks whose priority should increase due to downstream impact
+   - Tasks that could be deferred without affecting critical paths
+   - High-leverage tasks that unlock multiple other tasks
+
+4. System Intelligence:
+   - Patterns in task completion that suggest workflow improvements
+   - Bottlenecks that consistently slow progress
+   - Opportunities for automation or simplification
+
+Return JSON with task_relationships array, coordination_suggestions, optimization_opportunities, and priority_adjustments. Focus on actionable insights that help the user work more intelligently rather than just harder.`;
