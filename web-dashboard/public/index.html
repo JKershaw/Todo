@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity System Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>🎯 Productivity Dashboard</h1>
+            <div class="status" id="connection-status">
+                <span class="dot offline"></span>
+                Connecting...
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="grid">
+                <!-- Workspace Overview -->
+                <section class="card workspace-card">
+                    <h2>📋 Workspace Status</h2>
+                    <div id="workspace-content" class="content">
+                        <div class="loading">Loading workspace...</div>
+                    </div>
+                </section>
+
+                <!-- Active Projects -->
+                <section class="card projects-card">
+                    <h2>🚀 Active Projects</h2>
+                    <div id="projects-content" class="content">
+                        <div class="loading">Loading projects...</div>
+                    </div>
+                </section>
+
+                <!-- Activity Feed -->
+                <section class="card activity-card">
+                    <h2>⚡ Recent Activity</h2>
+                    <div id="activity-content" class="content">
+                        <div class="activity-item">
+                            <div class="activity-time">Just now</div>
+                            <div class="activity-description">Dashboard connected</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- System Health -->
+                <section class="card health-card">
+                    <h2>💚 System Health</h2>
+                    <div id="health-content" class="content">
+                        <div class="health-metric">
+                            <span class="metric-label">Connection</span>
+                            <span class="metric-value" id="connection-health">Connecting</span>
+                        </div>
+                        <div class="health-metric">
+                            <span class="metric-label">Workspace</span>
+                            <span class="metric-value">Active</span>
+                        </div>
+                        <div class="health-metric">
+                            <span class="metric-label">File Watching</span>
+                            <span class="metric-value">Enabled</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Feedback Section -->
+        <aside class="feedback-panel" id="feedback-panel">
+            <h3>💭 Quick Feedback</h3>
+            <p>Help us improve the dashboard experience:</p>
+            <div class="feedback-buttons">
+                <button class="btn-feedback" data-feedback="love">❤️ Love it</button>
+                <button class="btn-feedback" data-feedback="good">👍 Good</button>
+                <button class="btn-feedback" data-feedback="meh">😐 Okay</button>
+                <button class="btn-feedback" data-feedback="bad">👎 Needs work</button>
+            </div>
+            <textarea id="feedback-text" placeholder="What would make this more useful? (optional)"></textarea>
+            <button id="submit-feedback" class="btn-primary">Send Feedback</button>
+        </aside>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
