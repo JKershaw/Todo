@@ -10,6 +10,22 @@ A minimal, markdown-based, local-first personal productivity system for develope
 - **Minimal**: Text files over databases, simple commands over complex UI
 - **Gentle**: Supportive guidance, not harsh accountability
 
+## 🚀 New: Focus Flow Web Dashboard
+
+Experience the revolutionary Focus Flow interface - the core vision of this productivity system:
+
+```bash
+# Start the web dashboard
+cd web-dashboard
+npm install
+npm run server:start
+
+# Visit http://localhost:3000
+# See your next 3-5 Level 0 tasks with progressive zoom-out to larger goals
+```
+
+The web dashboard delivers the original vision: **"What should I do right now?"** with seamless connection to larger life goals.
+
 ## Quick Start
 
 1. **Install dependencies**
@@ -40,6 +56,13 @@ A minimal, markdown-based, local-first personal productivity system for develope
 5. **Check your status**
    ```bash
    node ../dist/index.js status
+   ```
+
+6. **Experience the Focus Flow Interface** ✨
+   ```bash
+   cd web-dashboard
+   npm run server:start
+   # Visit http://localhost:3000 to see the revolutionary UX
    ```
 
 ## Core Commands
@@ -74,6 +97,23 @@ prod zoom out         # Zoom out to higher-level goals
 prod zoom level 2     # Jump to project level
 ```
 
+### `prod reflect`
+Guided reflection sessions for weekly/monthly reviews with AI insights.
+
+```bash
+prod reflect          # Start guided reflection
+```
+
+### `prod project <action> [name]`
+Complete project lifecycle management.
+
+```bash
+prod project create my-new-project    # Create structured project file
+prod project list                     # List all active projects
+prod project status my-project        # Get project status and next actions
+prod project complete my-project      # Mark project as completed
+```
+
 ## Zoom Levels
 
 The system organizes work across 5 scale levels:
@@ -83,6 +123,24 @@ The system organizes work across 5 scale levels:
 - **Level 2**: Projects (days-weeks)
 - **Level 3**: Quarterly goals (1-3 months)
 - **Level 4**: Annual/life goals
+
+## Focus Flow Interface - The Revolutionary UX
+
+The **Focus Flow Interface** is the breakthrough that transforms this from a simple task manager into a revolutionary productivity system:
+
+### Core Innovation
+- **"What should I do right now?"** - Clean, distraction-free view of your next 3-5 Level 0 tasks
+- **Progressive Zoom-Out** - Scroll down to see how immediate tasks connect to larger goals
+- **Dynamic System** - Treats productivity as a living system, not static lists
+- **Real-time Updates** - WebSocket-powered monitoring of your workspace
+
+### The Experience
+1. **Immediate Focus**: See your next Level 0 actions (5-15 minutes each)
+2. **Context Connection**: Understand how these tasks connect to active projects  
+3. **Purpose Alignment**: See the larger goals these actions serve
+4. **Interactive Completion**: Click tasks to mark them complete with visual feedback
+
+This delivers the natural transition from "what do I do right now?" to "why does this matter?" - the core vision of intelligent productivity.
 
 ## File Structure
 
@@ -100,6 +158,11 @@ workspace/
 └── system/               # System development files
     ├── backlog.md
     └── changelog.md
+
+web-dashboard/             # Focus Flow Interface
+├── server/               # Express.js server with WebSocket support
+├── public/               # Web interface files
+└── scripts/              # Server management utilities
 ```
 
 ## Configuration
