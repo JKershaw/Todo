@@ -14,8 +14,17 @@ const md = new MarkdownIt();
 const PORT = process.env.PORT || 3000;
 const WORKSPACE_PATH = path.join(__dirname, '../../workspace');
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '../public')));
+// Serve static files with no-cache headers to prevent browser caching issues
+app.use(express.static(path.join(__dirname, '../public'), {
+  setHeaders: (res, path) => {
+    // Disable caching for HTML, CSS, and JS files to ensure latest version loads
+    if (path.endsWith('.html') || path.endsWith('.css') || path.endsWith('.js')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
 app.use(express.json());
 
 // API Routes
@@ -331,6 +340,309 @@ app.post('/api/tasks/complete', async (req, res) => {
   } catch (error) {
     console.error('Error completing task:', error);
     res.status(500).json({ error: 'Failed to complete task' });
+  }
+});
+
+// Simple AI Status Analysis endpoint (first step)
+app.post('/api/ai/status', async (req, res) => {
+  try {
+    console.log('🤖 AI Status Analysis requested');
+    
+    // Step 1: Provide basic implementation for frontend development
+    const mockAnalysis = {
+      analysis: 'AI Status: Web interface completion project is progressing well. Focus Flow interface is fully functional with three-mode design.',
+      suggestions: [
+        'Complete web-based AI analysis integration',
+        'Add progress recording functionality to dashboard',
+        'Implement project management interface'
+      ],
+      proposed_changes: [],
+      reasoning: 'System is ready for web interface expansion to achieve full CLI functionality parity.'
+    };
+    
+    console.log('✅ Mock AI analysis returned');
+    res.json({
+      success: true,
+      analysis: mockAnalysis,
+      aiService: {
+        provider: 'mock',
+        model: 'development-placeholder'
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in AI status analysis:', error);
+    res.status(500).json({ error: 'Failed to analyze status' });
+  }
+});
+
+// AI Coordinate Tasks endpoint (step 2)
+app.post('/api/ai/coordinate', async (req, res) => {
+  try {
+    console.log('🔗 AI Task Coordination requested');
+    
+    // Step 2: Provide mock coordination analysis for frontend development  
+    const mockCoordination = {
+      task_relationships: [
+        {
+          from_task: "Implement AI coordinate tasks API endpoint",
+          to_task: "Enable coordinate button and integrate with frontend", 
+          relationship_type: "dependency",
+          strength: "strong",
+          description: "API endpoint must be working before frontend integration can be completed"
+        },
+        {
+          from_task: "Complete web interface functionality",
+          to_task: "Test full CLI parity through web dashboard",
+          relationship_type: "enables", 
+          strength: "strong",
+          description: "Full web functionality enables comprehensive testing of CLI feature parity"
+        }
+      ],
+      coordination_suggestions: [
+        "Continue with small logical steps approach for web interface completion",
+        "Focus on AI-powered features to provide intelligent task insights",
+        "Test each feature thoroughly before proceeding to next step"
+      ],
+      optimization_opportunities: [
+        "Batch AI-related web interface features for consistent development flow",
+        "Create reusable components for AI analysis display across different features"
+      ],
+      priority_adjustments: [
+        {
+          task: "Implement progress recording functionality",
+          current_priority: 2,
+          suggested_priority: 1,
+          reasoning: "Progress recording is essential for completing the save command web interface"
+        }
+      ]
+    };
+    
+    console.log('✅ Mock coordination analysis returned');
+    res.json({
+      success: true,
+      analysis: mockCoordination,
+      aiService: {
+        provider: 'mock',
+        model: 'development-placeholder'
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in AI coordination analysis:', error);
+    res.status(500).json({ error: 'Failed to coordinate tasks' });
+  }
+});
+
+// Progress Recording endpoint (step 3)  
+app.post('/api/ai/save', async (req, res) => {
+  try {
+    const { description } = req.body;
+    
+    if (!description || description.trim().length === 0) {
+      return res.status(400).json({ error: 'Description is required' });
+    }
+    
+    console.log('💾 Progress recording requested:', description);
+    
+    // Step 3: Provide mock progress analysis for frontend development
+    const mockProgressAnalysis = {
+      analysis: `Progress recorded: ${description}. This represents continued momentum in the web interface completion project.`,
+      suggestions: [
+        'Continue implementing remaining CLI features in web interface',
+        'Test each new feature thoroughly before proceeding',
+        'Focus on user experience improvements'
+      ],
+      proposed_changes: [
+        {
+          file_path: 'projects/web-interface-completion.md',
+          change_type: 'update',
+          diff: `Mark progress recording functionality as completed`
+        }
+      ],
+      reasoning: 'Progress recording helps track development momentum and provides opportunity for AI-assisted file updates.'
+    };
+    
+    // Mock file update confirmation (user would approve/reject in real implementation)
+    const fileUpdateApplied = Math.random() > 0.5; // Simulate user decision
+    
+    console.log('✅ Mock progress analysis completed');
+    res.json({
+      success: true,
+      analysis: mockProgressAnalysis,
+      fileUpdateApplied,
+      message: fileUpdateApplied ? 
+        'Progress recorded and file updates applied' : 
+        'Progress recorded, file updates cancelled by user',
+      aiService: {
+        provider: 'mock',
+        model: 'development-placeholder'
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in progress recording:', error);
+    res.status(500).json({ error: 'Failed to record progress' });
+  }
+});
+
+// Project Management endpoints (step 4)
+
+// List all projects
+app.get('/api/projects/list', async (req, res) => {
+  try {
+    console.log('📋 Project list requested');
+    
+    const projectsDir = path.join(WORKSPACE_PATH, 'projects');
+    const files = await fs.readdir(projectsDir);
+    const projectFiles = files.filter(file => file.endsWith('.md'));
+    
+    const projects = [];
+    
+    for (const file of projectFiles) {
+      const filePath = path.join(projectsDir, file);
+      const content = await fs.readFile(filePath, 'utf-8');
+      const lines = content.split('\n');
+      
+      // Extract project info
+      const projectName = file.replace('.md', '');
+      let status = 'Active';
+      let level = 2;
+      let goal = '';
+      
+      // Parse project metadata
+      for (const line of lines) {
+        if (line.startsWith('**Status:**')) {
+          status = line.replace('**Status:**', '').trim();
+        }
+        if (line.startsWith('**Level:**')) {
+          level = parseInt(line.replace('**Level:**', '').trim()) || 2;
+        }
+        if (line.startsWith('## Goal')) {
+          const goalIndex = lines.indexOf(line);
+          if (goalIndex !== -1 && lines[goalIndex + 1]) {
+            goal = lines[goalIndex + 1].trim();
+          }
+        }
+      }
+      
+      // Count tasks
+      let totalTasks = 0;
+      let completedTasks = 0;
+      
+      for (const line of lines) {
+        if (line.includes('- [ ]')) totalTasks++;
+        if (line.includes('- [x]')) {
+          totalTasks++;
+          completedTasks++;
+        }
+      }
+      
+      projects.push({
+        name: projectName,
+        displayName: projectName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        status,
+        level,
+        goal: goal || 'No goal specified',
+        totalTasks,
+        completedTasks,
+        completionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+        file
+      });
+    }
+    
+    console.log(`✅ Found ${projects.length} projects`);
+    res.json({ success: true, projects });
+    
+  } catch (error) {
+    console.error('Error listing projects:', error);
+    res.status(500).json({ error: 'Failed to list projects' });
+  }
+});
+
+// Create new project  
+app.post('/api/projects/create', async (req, res) => {
+  try {
+    const { name, goal, level } = req.body;
+    
+    if (!name || !goal) {
+      return res.status(400).json({ error: 'Project name and goal are required' });
+    }
+    
+    console.log('📋 Creating new project:', name);
+    
+    const projectFileName = name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.md';
+    const projectPath = path.join(WORKSPACE_PATH, 'projects', projectFileName);
+    
+    // Check if project already exists
+    try {
+      await fs.access(projectPath);
+      return res.status(400).json({ error: 'Project already exists' });
+    } catch (e) {
+      // Project doesn't exist, continue
+    }
+    
+    const projectTemplate = `# Project: ${name}
+
+**Status:** Active  
+**Level:** ${level || 2}  
+**Started:** ${new Date().toISOString().split('T')[0]}  
+**Target:** (Set target date)
+
+## Goal
+${goal}
+
+## Level 4 Connection (Life Goal)
+Connect this project to your broader life vision and long-term objectives.
+
+## Level 3 Milestones (Quarterly)
+- [ ] Major milestone 1
+- [ ] Major milestone 2
+- [ ] Major milestone 3
+
+## Level 2 Tasks (Current Sprint)
+- [ ] Break down project into specific deliverables
+- [ ] Set up necessary tools and resources
+- [ ] Define success criteria
+
+## Level 1 Tasks (This Week)
+- [ ] First concrete step
+- [ ] Research and planning tasks
+- [ ] Initial implementation
+
+## Level 0 Actions (Next 15 minutes)
+- [ ] Quick actionable task
+- [ ] Review project scope
+- [ ] Set up workspace/files
+
+## Completed
+- [x] Project created and structured
+
+## Notes
+Add project notes, reflections, and important information here.
+
+## Resources
+- Links to relevant documentation
+- Contact information for stakeholders
+- Reference materials
+`;
+
+    await fs.writeFile(projectPath, projectTemplate, 'utf-8');
+    
+    console.log(`✅ Project created: ${projectFileName}`);
+    res.json({ 
+      success: true, 
+      message: 'Project created successfully',
+      project: {
+        name: name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+        displayName: name,
+        file: projectFileName
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error creating project:', error);
+    res.status(500).json({ error: 'Failed to create project' });
   }
 });
 
