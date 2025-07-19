@@ -47,6 +47,9 @@ export const saveCommand = async (description: string, workspaceDir: string = '.
           }
         }
         
+        // Show AI service info for transparency
+        console.log(chalk.yellow(`\n⚠️  AI Service: ${config.ai.provider} (${config.ai.model})`));
+        
         // Prompt for confirmation
         const confirmed = await promptConfirmation('\nApply these changes?');
         
@@ -161,8 +164,17 @@ const recordProgressOnly = async (files: any, description: string): Promise<void
 };
 
 const promptConfirmation = async (message: string): Promise<boolean> => {
-  // For now, return true. In a real implementation, you'd use readline or similar
-  // to get user input. This is a simple V1 approach.
-  console.log(chalk.blue(message + ' [Y/n]'));
-  return true;
+  const readline = require('readline');
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  
+  return new Promise((resolve) => {
+    rl.question(chalk.blue(message + ' [Y/n]: '), (answer: string) => {
+      rl.close();
+      const confirmed = !answer || answer.toLowerCase().trim() === 'y' || answer.toLowerCase().trim() === 'yes';
+      resolve(confirmed);
+    });
+  });
 };
