@@ -31,8 +31,9 @@ Build tools that amplify human thinking without replacing human judgment.
 - [x] Server infrastructure with graceful shutdown
 - [x] Level 0 task parsing and extraction API
 - [x] AI task relationship mapping and suggestions
-- [ ] Task completion integration (dashboard → files)
-- [ ] Momentum visualization for progress indicators
+- [x] Task completion integration (dashboard → files)
+- [x] Momentum visualization for progress indicators
+- [x] Make Plan mode tasks clickable for completion
 
 ## Level 1 Tasks (This Week)
 - [x] Set up development environment
@@ -47,7 +48,7 @@ Build tools that amplify human thinking without replacing human judgment.
 - [x] Create end-to-end test suite
 - [x] Implement reflect command
 - [x] Add project lifecycle management
-- [ ] Set up Heroku deployment with Procfile and package.json configuration
+- [x] Set up Heroku deployment with Procfile and package.json configuration
 
 ## Level 0 Actions (Next 15 minutes)
 - [x] Add dotenv package for .env file loading
