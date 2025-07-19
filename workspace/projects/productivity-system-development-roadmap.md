@@ -44,7 +44,7 @@ As tasks complete, the AI learns about your patterns, time estimates, and prefer
 ### Data Evolution
 Your markdown files become a living record of your progress. The AI can identify when goals shift, when new patterns emerge, or when it's time to break a large goal into smaller, more actionable pieces.
 
-**The genius of this approach is that it treats productivity as a dynamic system rather than a static list, while keeping the underlying data completely portable and human-readable.**
+**The strength of this approach is that it treats productivity as a dynamic system rather than a static list, while keeping the underlying data completely portable and human-readable.**
 
 ## Current State Assessment
 

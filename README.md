@@ -12,7 +12,7 @@ A minimal, markdown-based, local-first personal productivity system for develope
 
 ## 🚀 New: Focus Flow Web Dashboard
 
-Experience the revolutionary Focus Flow interface - the core vision of this productivity system:
+Experience the Focus Flow interface - the core vision of this productivity system:
 
 ```bash
 # Start the web dashboard
@@ -62,7 +62,7 @@ The web dashboard delivers the original vision: **"What should I do right now?"*
    ```bash
    cd web-dashboard
    npm run server:start
-   # Visit http://localhost:3000 to see the revolutionary UX
+   # Visit http://localhost:3000 to see the Focus Flow UX
    ```
 
 ## Core Commands
@@ -124,9 +124,9 @@ The system organizes work across 5 scale levels:
 - **Level 3**: Quarterly goals (1-3 months)
 - **Level 4**: Annual/life goals
 
-## Focus Flow Interface - The Revolutionary UX
+## Focus Flow Interface - The Core UX
 
-The **Focus Flow Interface** is the breakthrough that transforms this from a simple task manager into a revolutionary productivity system:
+The **Focus Flow Interface** is the key innovation that transforms this from a simple task manager into an intelligent productivity system:
 
 ### Core Innovation
 - **"What should I do right now?"** - Clean, distraction-free view of your next 3-5 Level 0 tasks
