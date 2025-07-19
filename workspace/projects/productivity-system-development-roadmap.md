@@ -12,15 +12,61 @@ Create a comprehensive development roadmap for evolving the productivity system 
 Build tools that amplify human thinking without replacing human judgment - creating systems that enhance productivity while maintaining human agency and creativity.
 
 ## Original Project Brief
-[PLACEHOLDER - USER TO ADD ORIGINAL BRIEF]
-*This section will contain the original project specification that drives the system's development priorities and user experience design.*
+
+### Core Architecture
+**Data Structure**: Markdown files organized hierarchically, where each goal/project has its own file with nested task levels. The beauty of markdown is that it naturally supports this kind of hierarchical structure through headers and indentation.
+
+**Scale Framework**: Think of it as a logarithmic scale where tasks exist at different "altitudes":
+- **Level 0**: Immediate actions (5-15 minutes)
+- **Level 1**: Daily/weekly tasks (hours)  
+- **Level 2**: Monthly projects (days/weeks)
+- **Level 3**: Quarterly goals (months)
+- **Level 4**: Annual/life goals (years)
+
+### The "Focus Flow" Experience
+The app opens showing your next 3-5 Level 0 tasks in a clean, distraction-free view. But as you scroll down, the interface gradually "zooms out" - showing how these immediate tasks connect to larger contexts. This creates a natural transition from "what do I do right now?" to "why does this matter?"
+
+### AI Integration Points
+The LLM becomes your intelligent task coordinator:
+
+**Task Relationship Mapping**: As you complete small tasks, the AI identifies which larger goals they serve and suggests logical next steps. For example, "researching mortgage rates" connects to "house buying" and might suggest "check credit score" as a follow-up.
+
+**Dynamic Prioritization**: The AI can reweight tasks based on completed work, external factors (seasons, deadlines), and emerging patterns in your behavior.
+
+**Context Inference**: Rather than you manually categorizing every task, the AI reads your markdown files and understands that "clean out spare room" relates to both "house maintenance" and potentially "prepare for guests" or even "create home office space."
+
+### Momentum Visualization
+The app could show "momentum arrows" - visual indicators of how completing small tasks creates progress toward larger goals. Completing several house-related micro-tasks might show your "homeownership momentum" building, making the connection between daily actions and life goals tangible.
+
+### Adaptive Planning
+As tasks complete, the AI learns about your patterns, time estimates, and preferences. It can suggest breaking down large goals differently, identify when you're avoiding certain types of tasks, or notice when external changes (like seasons, work cycles) should shift priorities.
+
+### Data Evolution
+Your markdown files become a living record of your progress. The AI can identify when goals shift, when new patterns emerge, or when it's time to break a large goal into smaller, more actionable pieces.
+
+**The genius of this approach is that it treats productivity as a dynamic system rather than a static list, while keeping the underlying data completely portable and human-readable.**
 
 ## Current State Assessment
-- ✅ **Core V1 Complete**: All essential commands implemented and tested
-- ✅ **Self-Managing**: System successfully manages its own development  
-- ✅ **AI Integration**: Working AI service with graceful fallbacks
-- ✅ **Robust Testing**: 29 tests passing with full CI/CD workflow
-- 🎯 **89% Complete**: Bootstrap project nearly finished
+
+### ✅ Original Vision Elements Implemented
+- **Hierarchical Markdown Structure**: ✅ Files organized with nested task levels  
+- **Scale Framework (0-4)**: ✅ Logarithmic task altitude system implemented
+- **Basic AI Integration**: ✅ Anthropic API with intelligent analysis
+- **Self-Managing System**: ✅ Using system to manage its own development
+- **Data Portability**: ✅ Human-readable markdown files
+- **Web Dashboard Foundation**: ✅ Real-time monitoring interface
+
+### ❌ Original Vision Elements Missing  
+- **Focus Flow Experience**: ❌ No clean view of next 3-5 Level 0 tasks with zoom-out
+- **Momentum Visualization**: ❌ No visual progress indicators toward larger goals
+- **Task Relationship Mapping**: ❌ AI doesn't identify connections between completed tasks
+- **Dynamic Prioritization**: ❌ No reweighting based on completion patterns  
+- **Context Inference**: ❌ Manual task categorization, no AI understanding
+- **Adaptive Planning**: ❌ No pattern learning or time estimation
+- **Living Data Evolution**: ❌ No automatic goal shift detection
+
+### 🎯 Current Status: 40% of Original Vision Complete
+While we have a solid V1 foundation, we're missing the core "Focus Flow" experience and intelligent AI coordination that makes this system revolutionary.
 
 ---
 
@@ -35,23 +81,27 @@ Build tools that amplify human thinking without replacing human judgment - creat
 - [ ] Fix AI JSON parsing issue for better integration
 - [ ] Complete bootstrap project documentation
 
-### Short-term (Level 1 - This Week)  
-- [ ] **Web Dashboard MVP**: Basic browser interface for watching system work
-- [ ] **Habit Tracking System**: Add daily/weekly habit monitoring
-- [ ] **Reflection Algorithm Improvements**: Better pattern detection in reflection
-- [ ] **Enhanced AI Prompts**: Improve AI response formatting and accuracy
-- [ ] **Documentation Polish**: Complete README updates and usage guides
-- [ ] **Performance Optimization**: Optimize file operations and startup time
+### Short-term (Level 1 - This Week) - **ORIGINAL VISION FOCUS**
+- [x] **Web Dashboard MVP**: Basic browser interface for watching system work ✅
+- [ ] **Focus Flow Interface**: Clean view of next 3-5 Level 0 tasks with zoom-out experience
+- [ ] **Task Relationship Mapping**: AI identifies connections between completed tasks and suggests next steps
+- [ ] **Context Inference Engine**: AI automatically categorizes and understands task relationships
+- [ ] **Momentum Visualization**: Visual progress indicators showing movement toward larger goals
+- [ ] **Enhanced AI Prompts**: Improve AI to understand task context and suggest logical progressions
 
-### High Priority Addition (User Feedback)
-- [ ] **Web Dashboard Development**: Move from Phase 3 to Phase 1 for early user experience validation and feedback collection
+### Original Vision Priorities (User Feedback Implementation)
+- [x] **Web Dashboard Foundation**: ✅ Moved from Phase 3 to Phase 1 for early validation
+- [ ] **Focus Flow Experience**: Implement the core UX described in original brief
+- [ ] **Dynamic AI Coordination**: Transform from static commands to intelligent task coordinator
 
-### V1 Success Criteria
-- [ ] All core commands working flawlessly
-- [ ] 30+ tests passing with >95% coverage
-- [ ] Complete documentation with examples
-- [ ] AI integration working reliably
-- [ ] Self-bootstrap project 100% complete
+### V1 Success Criteria (Original Vision Alignment)
+- [ ] **Focus Flow Experience**: 3-5 Level 0 tasks displayed with zoom-out to larger context
+- [ ] **Intelligent Task Coordination**: AI suggests logical next steps based on completions  
+- [ ] **Task Relationship Understanding**: AI identifies connections between tasks across levels
+- [ ] **Momentum Visualization**: Visual indicators of progress toward larger goals
+- [ ] **Dynamic System**: Treats productivity as living system, not static list
+- [ ] **Technical Excellence**: 30+ tests passing, reliable AI integration
+- [ ] **Self-Management**: Bootstrap project 100% complete using the system
 
 ---
 
@@ -243,17 +293,21 @@ Build tools that amplify human thinking without replacing human judgment - creat
 
 ---
 
-## Notes
+## Development Philosophy Update (Post Original Brief Review)
 
-This roadmap represents an ambitious but achievable evolution of the productivity system from a functional V1 to a mature platform that could revolutionize how developers approach productivity. The key innovation is the recursive development approach - using the system to manage its own growth.
+**Critical Insight**: Our current V1 is technically complete but missing the core user experience described in the original brief. The "Focus Flow" interface and intelligent AI coordination are not Phase 2 features - they ARE the product.
 
-The roadmap prioritizes:
-1. **Stability** - Complete V1 with robust foundation
-2. **Intelligence** - Enhanced AI capabilities and automation  
-3. **Scale** - Team collaboration and enterprise features
-4. **Innovation** - Advanced productivity science and research
+**Revised Priorities**: 
+1. **Original Vision First** - Focus Flow experience and AI task coordination are V1 requirements
+2. **User Experience Over Features** - The gradual zoom-out from Level 0 to Level 4 is the key innovation
+3. **Intelligent Coordination** - AI should act as task coordinator, not just analyzer
+4. **Dynamic Visualization** - Momentum arrows and progress indicators make abstract productivity tangible
 
-Success will be measured not just by features delivered, but by measurable improvements in developer productivity and widespread adoption of the recursive development methodology.
+**Success Redefined**: 
+- V1 success means delivering the original vision's core experience
+- Technical completeness without the Focus Flow experience is only 40% complete
+- The web dashboard foundation enables rapid iteration toward the original vision
+- Self-managing development proves the system works for complex, multi-level projects
 
 ## Resources
 - Current GitHub Repository: https://github.com/JKershaw/Todo.git
