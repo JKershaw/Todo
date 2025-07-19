@@ -34,8 +34,13 @@ coverage/
 ehthumbs.db
 Thumbs.db
 
-# Test workspace (for development)
+# User workspaces (exclude personal productivity data)
 test-workspace/
+productivity-workspace/
+*-workspace/
+
+# But include the system's own workspace
+!workspace/
 
 # Log files
 *.log
