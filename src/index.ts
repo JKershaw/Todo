@@ -13,6 +13,7 @@ import { initCommand } from './commands/init';
 import { statusCommand } from './commands/status';
 import { saveCommand } from './commands/save';
 import { zoomCommand } from './commands/zoom';
+import { reflectCommand } from './commands/reflect';
 
 const program = new Command();
 
@@ -61,8 +62,7 @@ program
   .option('-t, --type <type>', 'Reflection type: weekly, monthly', 'weekly')
   .option('-d, --directory <dir>', 'Workspace directory', '.')
   .action(async (options) => {
-    console.log(chalk.yellow('Reflect command not yet implemented'));
-    console.log(chalk.white('This will provide guided reflection and system improvement'));
+    await reflectCommand(options.type as 'weekly' | 'monthly', options.directory);
   });
 
 program

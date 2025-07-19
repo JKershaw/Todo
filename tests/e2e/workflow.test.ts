@@ -64,6 +64,21 @@ describe('End-to-End Workflow', () => {
     expect(zoomOutput).toContain('Short-term projects');
   });
 
+  it('should handle reflect commands', async () => {
+    const distPath = path.join(__dirname, '../../dist/index.js');
+    
+    // Test weekly reflection
+    const { stdout: reflectOutput } = await execAsync(`node "${distPath}" reflect -d "${testDir}"`);
+    expect(reflectOutput).toContain('Weekly Reflection');
+    expect(reflectOutput).toContain('Basic Progress Summary');
+    
+    // Verify reflect.md was updated
+    const reflectPath = path.join(testDir, 'reflect.md');
+    const reflectContent = await fs.readFile(reflectPath, 'utf8');
+    expect(reflectContent).toContain('Weekly Reflection');
+    expect(reflectContent).toContain('Key Insights');
+  });
+
   it('should handle missing workspace gracefully', async () => {
     const distPath = path.join(__dirname, '../../dist/index.js');
     const nonExistentDir = path.join(__dirname, 'non-existent-workspace');
