@@ -38,12 +38,22 @@ async function startServer() {
   console.log('🟢 Starting productivity dashboard server...');
   const serverPath = path.join(__dirname, '../server/index.js');
   const child = spawn('node', [serverPath], {
-    stdio: 'inherit',
+    stdio: ['ignore', 'ignore', 'ignore'], // Detach from parent stdio
     detached: true
   });
   
-  child.unref();
-  console.log('🚀 Server started with PID:', child.pid);
+  child.unref(); // Allow parent to exit without waiting
+  
+  // Give the server a moment to start
+  setTimeout(async () => {
+    const running = await findServerProcess();
+    if (running) {
+      console.log('🚀 Server started successfully with PID:', running.pid);
+      console.log('📍 Dashboard available at: http://localhost:3000');
+    } else {
+      console.log('❌ Failed to start server');
+    }
+  }, 1000);
 }
 
 async function stopServer() {
