@@ -67,25 +67,57 @@ class ProductivityDashboard {
   }
 
   setupEventListeners() {
-    // Feedback system
-    const feedbackButtons = document.querySelectorAll('.btn-feedback');
-    feedbackButtons.forEach(btn => {
+    // Mode switching functionality
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const modeContents = document.querySelectorAll('.mode-content');
+    
+    const switchMode = (targetMode) => {
+      // Update button states
+      modeButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === targetMode);
+      });
+      
+      // Update content visibility
+      modeContents.forEach(content => {
+        content.classList.toggle('hidden', content.id !== `${targetMode}-content`);
+      });
+    };
+    
+    modeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        // Remove previous selection
-        feedbackButtons.forEach(b => b.classList.remove('selected'));
-        
-        // Select current button
-        btn.classList.add('selected');
-        this.feedbackData.rating = btn.dataset.feedback;
+        switchMode(btn.dataset.mode);
       });
     });
 
-    const submitFeedbackBtn = document.getElementById('submit-feedback');
-    const feedbackText = document.getElementById('feedback-text');
-    
-    submitFeedbackBtn.addEventListener('click', () => {
-      this.feedbackData.text = feedbackText.value;
-      this.submitFeedback();
+    // Chat functionality
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    const handleSend = () => {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      
+      this.addChatMessage(text, true);
+      chatInput.value = '';
+      
+      // Simulate AI response
+      setTimeout(() => {
+        const responses = [
+          "Great! That task looks like a good next step.",
+          "I notice this connects to your larger goals. Nice progress!",
+          "Perfect timing for that - your energy patterns suggest this is ideal.",
+          "This will unlock several other tasks. Good prioritization!"
+        ];
+        const response = responses[Math.floor(Math.random() * responses.length)];
+        this.addChatMessage(response, false);
+      }, 800 + Math.random() * 1200);
+    };
+
+    sendBtn.addEventListener('click', handleSend);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleSend();
+      }
     });
 
     // Auto-refresh every 30 seconds
@@ -317,6 +349,23 @@ class ProductivityDashboard {
     if (items.length > 10) {
       items[items.length - 1].remove();
     }
+  }
+
+  addChatMessage(text, isUser = false) {
+    const chatMessages = document.getElementById('chat-messages');
+    
+    const message = document.createElement('div');
+    message.className = `message ${isUser ? 'user' : 'ai'}`;
+    
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+    bubble.textContent = text;
+    
+    message.appendChild(bubble);
+    chatMessages.appendChild(message);
+    
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
   async submitFeedback() {
