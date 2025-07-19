@@ -156,6 +156,54 @@ AI is used for:
 
 All AI suggestions are presented to the user for approval before any changes are made.
 
+## Self-Building Workflow
+
+The system includes a special `workspace/` directory that demonstrates the system managing its own development. This is the ultimate dogfooding test - the productivity system uses itself to track its own improvements.
+
+### Getting Started with Self-Building
+
+1. **Explore the system workspace:**
+   ```bash
+   cd workspace
+   node ../dist/index.js status
+   ```
+
+2. **See the bootstrap project:**
+   ```bash
+   cat projects/build-productivity-system.md
+   ```
+   This file contains the system's own development tasks, organized across all zoom levels (0-4).
+
+3. **Start contributing to the system:**
+   ```bash
+   # Work on a pending task from the bootstrap project
+   # For example, implement the reflect command
+   
+   # Record your progress
+   node ../dist/index.js save "Implemented reflect command for weekly reviews"
+   
+   # Check how the system updates itself
+   node ../dist/index.js status
+   ```
+
+4. **Commit improvements back to the repo:**
+   ```bash
+   # After implementing a feature
+   git add .
+   git commit -m "Add reflect command implementation"
+   git push origin main
+   ```
+
+### Recursive Development Pattern
+
+- The `workspace/` shows current system development status
+- New features are planned and tracked using the system itself
+- Progress is recorded using `prod save`
+- The system provides AI insights about its own development
+- All improvements are version controlled and shareable
+
+This creates a feedback loop where the system continuously improves itself through its own productivity framework.
+
 ## Architecture
 
 - **Functional programming**: Pure functions, immutable data
