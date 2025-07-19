@@ -39,6 +39,8 @@ Build tools that amplify human thinking without replacing human judgment - make 
 - [x] Implement progress recording API endpoint (/api/ai/save)
 - [x] Add progress recording form/modal to web interface
 - [x] Test and validate progress recording feature end-to-end
+- [ ] Implement project management API endpoints (/api/projects/create, /api/projects/list, /api/projects/status)
+- [ ] Add project management interface to web dashboard
 
 ## Completed
 - [x] Project created and structured
