@@ -13,6 +13,9 @@ class ProductivityDashboard {
   init() {
     this.setupWebSocket();
     this.setupEventListeners();
+    this.setupAIControls();
+    this.setupProgressRecording();
+    this.setupProjectManagement();
     this.loadInitialData();
   }
 
@@ -85,7 +88,13 @@ class ProductivityDashboard {
     
     modeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        switchMode(btn.dataset.mode);
+        const mode = btn.dataset.mode;
+        switchMode(mode);
+        
+        // Load mode-specific data
+        if (mode === 'projects') {
+          this.loadProjectsList();
+        }
       });
     });
 
@@ -168,11 +177,12 @@ class ProductivityDashboard {
               levelHtml += `<div class="project-section">
                 <div class="project-name">${this.escapeHtml(projectName)}</div>`;
               
-              projectLevels[level].forEach(task => {
+              projectLevels[level].forEach((task, taskIndex) => {
                 const taskClass = task.completed ? 'completed' : 'pending';
                 const checkIcon = task.completed ? '✅' : '◯';
+                const clickable = task.completed ? '' : 'clickable';
                 levelHtml += `
-                  <div class="plan-task ${taskClass}">
+                  <div class="plan-task ${taskClass} ${clickable}" data-task-data='${JSON.stringify(task)}' data-task-index="${taskIndex}">
                     <span class="task-check">${checkIcon}</span>
                     <span class="task-text">${this.escapeHtml(task.task)}</span>
                   </div>`;
@@ -190,6 +200,15 @@ class ProductivityDashboard {
         }
         
         planContent.innerHTML = planHtml || '<div class="empty-state">No plan data found</div>';
+        
+        // Add click handlers for plan tasks
+        const planTasks = planContent.querySelectorAll('.plan-task.clickable');
+        planTasks.forEach(taskElement => {
+          taskElement.addEventListener('click', () => {
+            const taskData = JSON.parse(taskElement.dataset.taskData);
+            this.handleTaskClick(taskData, taskElement);
+          });
+        });
       } else {
         planContent.innerHTML = '<div class="empty-state">No projects found</div>';
       }
@@ -546,10 +565,550 @@ class ProductivityDashboard {
     div.textContent = text;
     return div.innerHTML;
   }
+
+  setupAIControls() {
+    const aiStatusBtn = document.getElementById('ai-status-btn');
+    const aiCoordinateBtn = document.getElementById('ai-coordinate-btn');
+    
+    if (aiStatusBtn) {
+      aiStatusBtn.addEventListener('click', async () => {
+        await this.handleAIStatusAnalysis();
+      });
+    }
+    
+    if (aiCoordinateBtn) {
+      aiCoordinateBtn.addEventListener('click', async () => {
+        await this.handleAICoordination();
+      });
+    }
+  }
+
+  async handleAIStatusAnalysis() {
+    const aiStatusBtn = document.getElementById('ai-status-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    
+    // Show loading state
+    aiStatusBtn.classList.add('loading');
+    aiStatusBtn.textContent = '🔄 Analyzing...';
+    
+    try {
+      console.log('🤖 Requesting AI status analysis');
+      
+      const response = await fetch('/api/ai/status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Display AI analysis in chat
+        const analysisMessage = document.createElement('div');
+        analysisMessage.className = 'chat-message ai-message';
+        analysisMessage.innerHTML = `
+          <strong>🧠 AI Status Analysis:</strong>
+          <p><strong>Analysis:</strong> ${this.escapeHtml(data.analysis.analysis)}</p>
+          <p><strong>Suggestions:</strong></p>
+          <ul>
+            ${data.analysis.suggestions.map(s => `<li>${this.escapeHtml(s)}</li>`).join('')}
+          </ul>
+          <p><strong>Reasoning:</strong> ${this.escapeHtml(data.analysis.reasoning)}</p>
+          <small style="opacity: 0.7;">AI Service: ${data.aiService.provider} (${data.aiService.model})</small>
+        `;
+        
+        chatMessages.appendChild(analysisMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        this.addActivityItem('AI status analysis completed', 'just now');
+        
+      } else {
+        throw new Error(data.error || 'Analysis failed');
+      }
+      
+    } catch (error) {
+      console.error('AI status analysis error:', error);
+      
+      // Display error in chat
+      const errorMessage = document.createElement('div');
+      errorMessage.className = 'chat-message ai-message';
+      errorMessage.innerHTML = `
+        <strong>⚠️ AI Analysis Error:</strong>
+        <p>Failed to get AI analysis: ${this.escapeHtml(error.message)}</p>
+      `;
+      
+      chatMessages.appendChild(errorMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+    } finally {
+      // Reset button state
+      aiStatusBtn.classList.remove('loading');
+      aiStatusBtn.textContent = '🧠 AI Status Analysis';
+    }
+  }
+
+  async handleAICoordination() {
+    const aiCoordinateBtn = document.getElementById('ai-coordinate-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    
+    // Show loading state
+    aiCoordinateBtn.classList.add('loading');
+    aiCoordinateBtn.textContent = '🔄 Coordinating...';
+    
+    try {
+      console.log('🔗 Requesting AI task coordination');
+      
+      const response = await fetch('/api/ai/coordinate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Display task relationships
+        let relationshipsHtml = '';
+        if (data.analysis.task_relationships && data.analysis.task_relationships.length > 0) {
+          relationshipsHtml = '<p><strong>🔗 Task Relationships:</strong></p><ul>';
+          data.analysis.task_relationships.forEach(rel => {
+            const typeIcon = rel.relationship_type === 'dependency' ? '🔸' :
+                            rel.relationship_type === 'enables' ? '🚀' : '🤝';
+            relationshipsHtml += `
+              <li>
+                ${typeIcon} <strong>${this.escapeHtml(rel.from_task)}</strong>
+                <br>&nbsp;&nbsp;&nbsp;→ ${this.escapeHtml(rel.to_task)}
+                <br>&nbsp;&nbsp;&nbsp;<em>${this.escapeHtml(rel.description)}</em>
+              </li>
+            `;
+          });
+          relationshipsHtml += '</ul>';
+        }
+        
+        // Display coordination message
+        const coordinationMessage = document.createElement('div');
+        coordinationMessage.className = 'chat-message ai-message';
+        coordinationMessage.innerHTML = `
+          <strong>🔗 AI Task Coordination:</strong>
+          ${relationshipsHtml}
+          <p><strong>💡 Suggestions:</strong></p>
+          <ul>
+            ${data.analysis.coordination_suggestions.map(s => `<li>${this.escapeHtml(s)}</li>`).join('')}
+          </ul>
+          <p><strong>⚡ Optimization Opportunities:</strong></p>
+          <ul>
+            ${data.analysis.optimization_opportunities.map(o => `<li>${this.escapeHtml(o)}</li>`).join('')}
+          </ul>
+          <small style="opacity: 0.7;">AI Service: ${data.aiService.provider} (${data.aiService.model})</small>
+        `;
+        
+        chatMessages.appendChild(coordinationMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        this.addActivityItem('AI task coordination completed', 'just now');
+        
+      } else {
+        throw new Error(data.error || 'Coordination failed');
+      }
+      
+    } catch (error) {
+      console.error('AI coordination error:', error);
+      
+      // Display error in chat
+      const errorMessage = document.createElement('div');
+      errorMessage.className = 'chat-message ai-message';
+      errorMessage.innerHTML = `
+        <strong>⚠️ AI Coordination Error:</strong>
+        <p>Failed to get task coordination: ${this.escapeHtml(error.message)}</p>
+      `;
+      
+      chatMessages.appendChild(errorMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+    } finally {
+      // Reset button state
+      aiCoordinateBtn.classList.remove('loading');
+      aiCoordinateBtn.textContent = '🔗 Coordinate Tasks';
+    }
+  }
+
+  setupProgressRecording() {
+    const progressBtn = document.getElementById('progress-btn');
+    const progressInput = document.getElementById('progress-input');
+    
+    if (progressBtn && progressInput) {
+      progressBtn.addEventListener('click', async () => {
+        await this.handleProgressRecording();
+      });
+      
+      // Allow Enter key to submit
+      progressInput.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+          await this.handleProgressRecording();
+        }
+      });
+    }
+  }
+
+  async handleProgressRecording() {
+    const progressBtn = document.getElementById('progress-btn');
+    const progressInput = document.getElementById('progress-input');
+    const chatMessages = document.getElementById('chat-messages');
+    
+    const description = progressInput.value.trim();
+    if (!description) {
+      progressInput.focus();
+      progressInput.style.borderColor = '#ef4444';
+      setTimeout(() => {
+        progressInput.style.borderColor = '';
+      }, 2000);
+      return;
+    }
+    
+    // Show loading state
+    progressBtn.classList.add('loading');
+    progressBtn.textContent = '🔄 Saving...';
+    progressBtn.disabled = true;
+    
+    try {
+      console.log('💾 Recording progress:', description);
+      
+      const response = await fetch('/api/ai/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ description })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Display progress analysis in chat
+        const progressMessage = document.createElement('div');
+        progressMessage.className = 'chat-message ai-message';
+        progressMessage.innerHTML = `
+          <strong>💾 Progress Recorded:</strong>
+          <p><strong>Analysis:</strong> ${this.escapeHtml(data.analysis.analysis)}</p>
+          <p><strong>Suggestions:</strong></p>
+          <ul>
+            ${data.analysis.suggestions.map(s => `<li>${this.escapeHtml(s)}</li>`).join('')}
+          </ul>
+          <p><strong>Reasoning:</strong> ${this.escapeHtml(data.analysis.reasoning)}</p>
+          ${data.fileUpdateApplied ? 
+            '<p style="color: #10b981;">✅ File updates applied</p>' : 
+            '<p style="color: #f59e0b;">⏸️ File updates cancelled by user</p>'
+          }
+          <small style="opacity: 0.7;">AI Service: ${data.aiService.provider} (${data.aiService.model})</small>
+        `;
+        
+        chatMessages.appendChild(progressMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Clear input and show success
+        progressInput.value = '';
+        this.addActivityItem(`Progress recorded: ${description.substring(0, 40)}...`, 'just now');
+        
+      } else {
+        throw new Error(data.error || 'Progress recording failed');
+      }
+      
+    } catch (error) {
+      console.error('Progress recording error:', error);
+      
+      // Display error in chat
+      const errorMessage = document.createElement('div');
+      errorMessage.className = 'chat-message ai-message';
+      errorMessage.innerHTML = `
+        <strong>⚠️ Progress Recording Error:</strong>
+        <p>Failed to record progress: ${this.escapeHtml(error.message)}</p>
+      `;
+      
+      chatMessages.appendChild(errorMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+    } finally {
+      // Reset button state
+      progressBtn.classList.remove('loading');
+      progressBtn.textContent = '💾 Save Progress';
+      progressBtn.disabled = false;
+    }
+  }
+
+  setupProjectManagement() {
+    const createProjectBtn = document.getElementById('create-project-btn');
+    const createProjectModal = document.getElementById('create-project-modal');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const cancelProjectBtn = document.getElementById('cancel-project-btn');
+    const saveProjectBtn = document.getElementById('save-project-btn');
+    
+    // Show modal when create button is clicked
+    if (createProjectBtn) {
+      createProjectBtn.addEventListener('click', () => {
+        this.showCreateProjectModal();
+      });
+    }
+    
+    // Hide modal when close buttons are clicked
+    if (modalCloseBtn) {
+      modalCloseBtn.addEventListener('click', () => {
+        this.hideCreateProjectModal();
+      });
+    }
+    
+    if (cancelProjectBtn) {
+      cancelProjectBtn.addEventListener('click', () => {
+        this.hideCreateProjectModal();
+      });
+    }
+    
+    // Handle form submission
+    if (saveProjectBtn) {
+      saveProjectBtn.addEventListener('click', async () => {
+        await this.handleCreateProject();
+      });
+    }
+    
+    // Close modal when clicking outside
+    if (createProjectModal) {
+      createProjectModal.addEventListener('click', (e) => {
+        if (e.target === createProjectModal) {
+          this.hideCreateProjectModal();
+        }
+      });
+    }
+    
+    // Handle Enter key in form fields
+    ['project-name', 'project-goal'].forEach(fieldId => {
+      const field = document.getElementById(fieldId);
+      if (field) {
+        field.addEventListener('keypress', async (e) => {
+          if (e.key === 'Enter' && e.shiftKey === false) {
+            e.preventDefault();
+            await this.handleCreateProject();
+          }
+        });
+      }
+    });
+  }
+  
+  showCreateProjectModal() {
+    const modal = document.getElementById('create-project-modal');
+    const nameField = document.getElementById('project-name');
+    const goalField = document.getElementById('project-goal');
+    const levelField = document.getElementById('project-level');
+    
+    // Reset form
+    if (nameField) nameField.value = '';
+    if (goalField) goalField.value = '';
+    if (levelField) levelField.value = '2';
+    
+    // Show modal
+    if (modal) {
+      modal.classList.remove('hidden');
+      // Focus on name field
+      setTimeout(() => {
+        if (nameField) nameField.focus();
+      }, 100);
+    }
+  }
+  
+  hideCreateProjectModal() {
+    const modal = document.getElementById('create-project-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+  
+  async handleCreateProject() {
+    const nameField = document.getElementById('project-name');
+    const goalField = document.getElementById('project-goal');
+    const levelField = document.getElementById('project-level');
+    const saveBtn = document.getElementById('save-project-btn');
+    
+    const name = nameField?.value.trim();
+    const goal = goalField?.value.trim();
+    const level = levelField?.value || '2';
+    
+    // Validation
+    if (!name) {
+      if (nameField) {
+        nameField.focus();
+        nameField.style.borderColor = '#ef4444';
+        setTimeout(() => {
+          nameField.style.borderColor = '';
+        }, 2000);
+      }
+      return;
+    }
+    
+    if (!goal) {
+      if (goalField) {
+        goalField.focus();
+        goalField.style.borderColor = '#ef4444';
+        setTimeout(() => {
+          goalField.style.borderColor = '';
+        }, 2000);
+      }
+      return;
+    }
+    
+    // Show loading state
+    const originalText = saveBtn?.textContent;
+    if (saveBtn) {
+      saveBtn.textContent = '🔄 Creating...';
+      saveBtn.disabled = true;
+    }
+    
+    try {
+      console.log('📋 Creating project:', name);
+      
+      const response = await fetch('/api/projects/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, goal, level: parseInt(level) })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('✅ Project created successfully:', data.project);
+        
+        // Hide modal
+        this.hideCreateProjectModal();
+        
+        // Show success message in chat
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
+          const successMessage = document.createElement('div');
+          successMessage.className = 'chat-message ai-message';
+          successMessage.innerHTML = `
+            <strong>✅ Project Created:</strong>
+            <p><strong>${this.escapeHtml(data.project.displayName)}</strong> has been created successfully!</p>
+            <p>You can now start adding tasks and tracking progress.</p>
+          `;
+          chatMessages.appendChild(successMessage);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Refresh project list
+        await this.loadProjectsList();
+        
+        // Log activity
+        this.addActivityItem(`Created project: ${name}`, 'just now');
+        
+      } else {
+        throw new Error(data.error || 'Failed to create project');
+      }
+      
+    } catch (error) {
+      console.error('Error creating project:', error);
+      
+      // Show error message
+      const chatMessages = document.getElementById('chat-messages');
+      if (chatMessages) {
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'chat-message ai-message';
+        errorMessage.innerHTML = `
+          <strong>⚠️ Project Creation Error:</strong>
+          <p>Failed to create project: ${this.escapeHtml(error.message)}</p>
+        `;
+        chatMessages.appendChild(errorMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+      
+    } finally {
+      // Reset button state
+      if (saveBtn && originalText) {
+        saveBtn.textContent = originalText;
+        saveBtn.disabled = false;
+      }
+    }
+  }
+  
+  async loadProjectsList() {
+    try {
+      console.log('📋 Loading projects list');
+      
+      const response = await fetch('/api/projects/list');
+      const data = await response.json();
+      
+      const projectsList = document.getElementById('projects-list');
+      
+      if (data.success && data.projects && data.projects.length > 0) {
+        const projectsHtml = data.projects.map(project => `
+          <div class="project-card">
+            <div class="project-card-header">
+              <h3 class="project-title">${this.escapeHtml(project.displayName)}</h3>
+              <span class="project-status">${this.escapeHtml(project.status)}</span>
+            </div>
+            <p class="project-goal">${this.escapeHtml(project.goal)}</p>
+            <div class="project-progress">
+              <div class="project-progress-label">
+                <span>Progress</span>
+                <span>${project.completionRate}%</span>
+              </div>
+              <div class="project-progress-bar">
+                <div class="project-progress-fill" style="width: ${project.completionRate}%"></div>
+              </div>
+            </div>
+            <div class="project-actions">
+              <button class="project-btn" onclick="dashboard.viewProject('${project.name}')">📋 View Tasks</button>
+              <button class="project-btn" onclick="dashboard.editProject('${project.name}')">✏️ Edit</button>
+              <button class="project-btn" onclick="dashboard.archiveProject('${project.name}')">📦 Archive</button>
+            </div>
+          </div>
+        `).join('');
+        
+        projectsList.innerHTML = projectsHtml;
+        
+      } else {
+        projectsList.innerHTML = `
+          <div class="empty-state">
+            <h3>No projects found</h3>
+            <p>Create your first project to start organizing your work!</p>
+          </div>
+        `;
+      }
+      
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      const projectsList = document.getElementById('projects-list');
+      if (projectsList) {
+        projectsList.innerHTML = '<div class="loading">Failed to load projects</div>';
+      }
+    }
+  }
+  
+  // Placeholder methods for project actions
+  viewProject(projectName) {
+    console.log('📋 View project:', projectName);
+    // TODO: Implement project details view
+    this.addChatMessage(`Opening project: ${projectName}`, false);
+  }
+  
+  editProject(projectName) {
+    console.log('✏️ Edit project:', projectName);
+    // TODO: Implement project editing
+    this.addChatMessage(`Editing project: ${projectName}`, false);
+  }
+  
+  archiveProject(projectName) {
+    console.log('📦 Archive project:', projectName);
+    // TODO: Implement project archiving
+    this.addChatMessage(`Archiving project: ${projectName}`, false);
+  }
 }
 
 // Initialize dashboard when page loads
+let dashboard;
 document.addEventListener('DOMContentLoaded', () => {
   console.log('🎯 Initializing Productivity Dashboard');
-  new ProductivityDashboard();
+  dashboard = new ProductivityDashboard();
 });
