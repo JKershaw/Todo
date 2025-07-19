@@ -16,9 +16,7 @@ Experience the Focus Flow interface - the core vision of this productivity syste
 
 ```bash
 # Start the web dashboard
-cd web-dashboard
-npm install
-npm run server:start
+npm run web
 
 # Visit http://localhost:3000
 # See your next 3-5 Level 0 tasks with progressive zoom-out to larger goals
@@ -60,8 +58,7 @@ The web dashboard delivers the original vision: **"What should I do right now?"*
 
 6. **Experience the Focus Flow Interface** ✨
    ```bash
-   cd web-dashboard
-   npm run server:start
+   npm run web
    # Visit http://localhost:3000 to see the Focus Flow UX
    ```
 
