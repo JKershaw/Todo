@@ -486,6 +486,167 @@ app.post('/api/ai/save', async (req, res) => {
   }
 });
 
+// AI Reflection endpoint (step 5)
+app.post('/api/ai/reflect', async (req, res) => {
+  try {
+    console.log('✨ AI Reflection requested');
+    
+    // Step 5: Provide mock reflection analysis for frontend development
+    const mockReflection = {
+      reflection_insights: [
+        {
+          category: "Momentum Analysis",
+          insight: "You've completed 70% of productivity system development tasks, showing strong momentum in systematic implementation.",
+          confidence: "high"
+        },
+        {
+          category: "Pattern Recognition", 
+          insight: "Your work follows a clear pattern: plan → implement → test → document. This systematic approach is yielding consistent progress.",
+          confidence: "high"
+        },
+        {
+          category: "Optimization Opportunity",
+          insight: "Consider implementing remaining CLI features (workspace init, zoom navigation) to achieve full feature parity between web and CLI interfaces.",
+          confidence: "medium"
+        }
+      ],
+      improvement_suggestions: [
+        "Continue with small logical steps approach - it's working well",
+        "Add comprehensive testing for each new feature before moving to next",
+        "Focus on user experience improvements for web interface adoption"
+      ],
+      goal_alignment: {
+        current_focus: "Web interface completion for full CLI functionality parity",
+        alignment_score: 95,
+        next_recommended_actions: [
+          "Implement workspace initialization in web interface",
+          "Add zoom navigation for scale level perspective",
+          "Complete AI reflection integration"
+        ]
+      },
+      momentum_assessment: {
+        overall_momentum: "Strong",
+        completion_trajectory: "On track for 100% web interface completion",
+        energy_level: "High - systematic progress with clear milestones"
+      }
+    };
+    
+    console.log('✅ Mock reflection analysis completed');
+    res.json({
+      success: true,
+      reflection: mockReflection,
+      aiService: {
+        provider: 'mock',
+        model: 'development-placeholder'
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in AI reflection:', error);
+    res.status(500).json({ error: 'Failed to generate reflection' });
+  }
+});
+
+// Workspace Initialization endpoint (step 5)
+app.post('/api/workspace/init', async (req, res) => {
+  try {
+    const { directory } = req.body;
+    
+    if (!directory || directory.trim().length === 0) {
+      return res.status(400).json({ error: 'Directory path is required' });
+    }
+    
+    console.log('🏗️ Workspace initialization requested for:', directory);
+    
+    // For security, only allow initialization within the current workspace parent
+    const normalizedDir = path.resolve(directory);
+    const allowedParent = path.resolve('/data/data/com.termux/files/home');
+    
+    if (!normalizedDir.startsWith(allowedParent)) {
+      return res.status(403).json({ error: 'Directory must be within allowed parent path' });
+    }
+    
+    // Mock workspace initialization (would normally call CLI init command)
+    const mockInitResult = {
+      directory: directory,
+      created_files: [
+        'README.md',
+        'plan.md', 
+        'projects/',
+        '.gitignore'
+      ],
+      status: 'success',
+      message: `Workspace initialized at ${directory}`,
+      next_steps: [
+        'Create your first project with the project creation interface',
+        'Set up AI integration by configuring API keys',
+        'Start tracking tasks using the Focus Flow interface'
+      ]
+    };
+    
+    console.log('✅ Mock workspace initialization completed');
+    res.json({
+      success: true,
+      result: mockInitResult
+    });
+    
+  } catch (error) {
+    console.error('Error in workspace initialization:', error);
+    res.status(500).json({ error: 'Failed to initialize workspace' });
+  }
+});
+
+// Zoom Navigation endpoint (step 5)
+app.post('/api/zoom', async (req, res) => {
+  try {
+    const { direction } = req.body;
+    
+    if (!direction || !['in', 'out'].includes(direction)) {
+      return res.status(400).json({ error: 'Direction must be "in" or "out"' });
+    }
+    
+    console.log('🔍 Zoom navigation requested:', direction);
+    
+    // Mock zoom navigation analysis
+    const currentLevel = 2; // Assume current focus is Level 2 (Projects)
+    const newLevel = direction === 'in' ? Math.max(0, currentLevel - 1) : Math.min(4, currentLevel + 1);
+    
+    const levelNames = {
+      0: "Immediate Actions (Next 15 minutes)",
+      1: "Today's Focus (Current day)", 
+      2: "Current Projects (Days to weeks)",
+      3: "Quarterly Milestones (1-3 months)",
+      4: "Life Goals (Years and beyond)"
+    };
+    
+    const mockZoomResult = {
+      direction: direction,
+      previous_level: currentLevel,
+      new_level: newLevel,
+      level_name: levelNames[newLevel],
+      context_shift: `Zoomed ${direction} from ${levelNames[currentLevel]} to ${levelNames[newLevel]}`,
+      recommended_focus: newLevel === 0 ? 
+        "Focus on immediate actionable tasks" :
+        newLevel === 4 ? 
+        "Reflect on long-term vision and life alignment" :
+        `Review ${levelNames[newLevel].toLowerCase()}`,
+      available_tasks: newLevel <= 2 ? 
+        `Use the ${newLevel === 0 ? 'Do' : newLevel === 1 ? 'Plan' : 'Projects'} mode to see relevant tasks` :
+        "Use Reflect mode to consider broader goals and milestones"
+    };
+    
+    console.log('✅ Mock zoom navigation completed');
+    res.json({
+      success: true,
+      zoom: mockZoomResult
+    });
+    
+  } catch (error) {
+    console.error('Error in zoom navigation:', error);
+    res.status(500).json({ error: 'Failed to navigate zoom levels' });
+  }
+});
+
 // Project Management endpoints (step 4)
 
 // List all projects

@@ -134,6 +134,63 @@ async function runTests() {
       failed++;
     }
     
+    // Test 6: AI Reflection endpoint
+    console.log('\n6️⃣  Testing AI Reflection endpoint...');
+    const reflectionResponse = await makeRequest('/api/ai/reflect', 'POST', {});
+    
+    if (reflectionResponse.status === 200 && 
+        reflectionResponse.data.success && 
+        reflectionResponse.data.reflection.reflection_insights) {
+      console.log('✅ AI Reflection: PASSED');
+      console.log(`   Insights found: ${reflectionResponse.data.reflection.reflection_insights.length}`);
+      console.log(`   Goal alignment: ${reflectionResponse.data.reflection.goal_alignment.alignment_score}%`);
+      passed++;
+    } else {
+      console.log('❌ AI Reflection: FAILED');
+      console.log(`   Status: ${reflectionResponse.status}`);
+      failed++;
+    }
+    
+    // Test 7: Zoom Navigation endpoint
+    console.log('\n7️⃣  Testing Zoom Navigation endpoint...');
+    const zoomResponse = await makeRequest('/api/zoom', 'POST', {
+      direction: 'in'
+    });
+    
+    if (zoomResponse.status === 200 && 
+        zoomResponse.data.success && 
+        zoomResponse.data.zoom.context_shift) {
+      console.log('✅ Zoom Navigation: PASSED');
+      console.log(`   Context: ${zoomResponse.data.zoom.context_shift}`);
+      console.log(`   New Level: ${zoomResponse.data.zoom.new_level}`);
+      passed++;
+    } else {
+      console.log('❌ Zoom Navigation: FAILED');
+      console.log(`   Status: ${zoomResponse.status}`);
+      failed++;
+    }
+    
+    // Test 8: Workspace Initialization endpoint
+    console.log('\n8️⃣  Testing Workspace Initialization endpoint...');
+    const testWorkspacePath = `/data/data/com.termux/files/home/test-workspace-${Date.now()}`;
+    const workspaceResponse = await makeRequest('/api/workspace/init', 'POST', {
+      directory: testWorkspacePath
+    });
+    
+    if (workspaceResponse.status === 200 && 
+        workspaceResponse.data.success && 
+        workspaceResponse.data.result.status === 'success') {
+      console.log('✅ Workspace Initialization: PASSED');
+      console.log(`   Directory: ${workspaceResponse.data.result.directory}`);
+      console.log(`   Files created: ${workspaceResponse.data.result.created_files.length}`);
+      passed++;
+    } else {
+      console.log('❌ Workspace Initialization: FAILED');
+      console.log(`   Status: ${workspaceResponse.status}`);
+      console.log(`   Error: ${workspaceResponse.data.error || 'Unknown error'}`);
+      failed++;
+    }
+    
   } catch (error) {
     console.log('❌ Test suite failed with error:', error.message);
     failed++;

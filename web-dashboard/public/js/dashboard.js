@@ -16,6 +16,7 @@ class ProductivityDashboard {
     this.setupAIControls();
     this.setupProgressRecording();
     this.setupProjectManagement();
+    this.setupNavigationControls();
     this.loadInitialData();
   }
 
@@ -569,6 +570,7 @@ class ProductivityDashboard {
   setupAIControls() {
     const aiStatusBtn = document.getElementById('ai-status-btn');
     const aiCoordinateBtn = document.getElementById('ai-coordinate-btn');
+    const aiReflectBtn = document.getElementById('ai-reflect-btn');
     
     if (aiStatusBtn) {
       aiStatusBtn.addEventListener('click', async () => {
@@ -579,6 +581,12 @@ class ProductivityDashboard {
     if (aiCoordinateBtn) {
       aiCoordinateBtn.addEventListener('click', async () => {
         await this.handleAICoordination();
+      });
+    }
+    
+    if (aiReflectBtn) {
+      aiReflectBtn.addEventListener('click', async () => {
+        await this.handleAIReflection();
       });
     }
   }
@@ -836,6 +844,326 @@ class ProductivityDashboard {
       progressBtn.classList.remove('loading');
       progressBtn.textContent = '💾 Save Progress';
       progressBtn.disabled = false;
+    }
+  }
+
+  async handleAIReflection() {
+    const aiReflectBtn = document.getElementById('ai-reflect-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    
+    // Show loading state
+    aiReflectBtn.classList.add('loading');
+    aiReflectBtn.textContent = '🔄 Reflecting...';
+    
+    try {
+      console.log('✨ Requesting AI reflection');
+      
+      const response = await fetch('/api/ai/reflect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Display reflection insights
+        let insightsHtml = '<p><strong>🔍 Key Insights:</strong></p><ul>';
+        data.reflection.reflection_insights.forEach(insight => {
+          const confidenceIcon = insight.confidence === 'high' ? '🟢' : 
+                                 insight.confidence === 'medium' ? '🟡' : '🔴';
+          insightsHtml += `
+            <li>
+              ${confidenceIcon} <strong>${this.escapeHtml(insight.category)}:</strong>
+              <br>&nbsp;&nbsp;&nbsp;${this.escapeHtml(insight.insight)}
+            </li>
+          `;
+        });
+        insightsHtml += '</ul>';
+        
+        // Display reflection message
+        const reflectionMessage = document.createElement('div');
+        reflectionMessage.className = 'chat-message ai-message';
+        reflectionMessage.innerHTML = `
+          <strong>✨ AI Reflection Analysis:</strong>
+          ${insightsHtml}
+          <p><strong>💡 Improvement Suggestions:</strong></p>
+          <ul>
+            ${data.reflection.improvement_suggestions.map(s => `<li>${this.escapeHtml(s)}</li>`).join('')}
+          </ul>
+          <p><strong>🎯 Goal Alignment (${data.reflection.goal_alignment.alignment_score}%):</strong></p>
+          <p>${this.escapeHtml(data.reflection.goal_alignment.current_focus)}</p>
+          <p><strong>⚡ Momentum: ${data.reflection.momentum_assessment.overall_momentum}</strong></p>
+          <p>${this.escapeHtml(data.reflection.momentum_assessment.completion_trajectory)}</p>
+          <small style="opacity: 0.7;">AI Service: ${data.aiService.provider} (${data.aiService.model})</small>
+        `;
+        
+        chatMessages.appendChild(reflectionMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        this.addActivityItem('AI reflection analysis completed', 'just now');
+        
+      } else {
+        throw new Error(data.error || 'Reflection failed');
+      }
+      
+    } catch (error) {
+      console.error('AI reflection error:', error);
+      
+      // Display error in chat
+      const errorMessage = document.createElement('div');
+      errorMessage.className = 'chat-message ai-message';
+      errorMessage.innerHTML = `
+        <strong>⚠️ AI Reflection Error:</strong>
+        <p>Failed to generate reflection: ${this.escapeHtml(error.message)}</p>
+      `;
+      
+      chatMessages.appendChild(errorMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+    } finally {
+      // Reset button state
+      aiReflectBtn.classList.remove('loading');
+      aiReflectBtn.textContent = '✨ AI Reflection';
+    }
+  }
+
+  setupNavigationControls() {
+    const zoomInBtn = document.getElementById('zoom-in-btn');
+    const zoomOutBtn = document.getElementById('zoom-out-btn');
+    const workspaceInitBtn = document.getElementById('workspace-init-btn');
+    
+    if (zoomInBtn) {
+      zoomInBtn.addEventListener('click', async () => {
+        await this.handleZoomNavigation('in');
+      });
+    }
+    
+    if (zoomOutBtn) {
+      zoomOutBtn.addEventListener('click', async () => {
+        await this.handleZoomNavigation('out');
+      });
+    }
+    
+    if (workspaceInitBtn) {
+      workspaceInitBtn.addEventListener('click', () => {
+        this.showWorkspaceInitModal();
+      });
+    }
+    
+    // Workspace initialization modal handlers
+    const workspaceModal = document.getElementById('workspace-init-modal');
+    const workspaceModalCloseBtn = document.getElementById('workspace-modal-close-btn');
+    const cancelWorkspaceBtn = document.getElementById('cancel-workspace-btn');
+    const initWorkspaceBtn = document.getElementById('init-workspace-btn');
+    
+    if (workspaceModalCloseBtn) {
+      workspaceModalCloseBtn.addEventListener('click', () => {
+        this.hideWorkspaceInitModal();
+      });
+    }
+    
+    if (cancelWorkspaceBtn) {
+      cancelWorkspaceBtn.addEventListener('click', () => {
+        this.hideWorkspaceInitModal();
+      });
+    }
+    
+    if (initWorkspaceBtn) {
+      initWorkspaceBtn.addEventListener('click', async () => {
+        await this.handleWorkspaceInit();
+      });
+    }
+    
+    // Close modal when clicking outside
+    if (workspaceModal) {
+      workspaceModal.addEventListener('click', (e) => {
+        if (e.target === workspaceModal) {
+          this.hideWorkspaceInitModal();
+        }
+      });
+    }
+  }
+  
+  async handleZoomNavigation(direction) {
+    const zoomBtn = document.getElementById(`zoom-${direction}-btn`);
+    const chatMessages = document.getElementById('chat-messages');
+    
+    // Show loading state
+    zoomBtn.classList.add('loading');
+    zoomBtn.textContent = direction === 'in' ? '🔄 Zooming In...' : '🔄 Zooming Out...';
+    
+    try {
+      console.log(`🔍 Zoom ${direction} navigation requested`);
+      
+      const response = await fetch('/api/zoom', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ direction })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Display zoom navigation result
+        const zoomMessage = document.createElement('div');
+        zoomMessage.className = 'chat-message ai-message';
+        zoomMessage.innerHTML = `
+          <strong>🔍 Zoom Navigation:</strong>
+          <p><strong>Context Shift:</strong> ${this.escapeHtml(data.zoom.context_shift)}</p>
+          <p><strong>New Focus:</strong> ${this.escapeHtml(data.zoom.level_name)}</p>
+          <p><strong>Recommendation:</strong> ${this.escapeHtml(data.zoom.recommended_focus)}</p>
+          <p><strong>Next Steps:</strong> ${this.escapeHtml(data.zoom.available_tasks)}</p>
+        `;
+        
+        chatMessages.appendChild(zoomMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        this.addActivityItem(`Zoomed ${direction} to Level ${data.zoom.new_level}`, 'just now');
+        
+      } else {
+        throw new Error(data.error || 'Zoom navigation failed');
+      }
+      
+    } catch (error) {
+      console.error('Zoom navigation error:', error);
+      
+      // Display error in chat
+      const errorMessage = document.createElement('div');
+      errorMessage.className = 'chat-message ai-message';
+      errorMessage.innerHTML = `
+        <strong>⚠️ Zoom Navigation Error:</strong>
+        <p>Failed to navigate: ${this.escapeHtml(error.message)}</p>
+      `;
+      
+      chatMessages.appendChild(errorMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+    } finally {
+      // Reset button state
+      zoomBtn.classList.remove('loading');
+      zoomBtn.textContent = direction === 'in' ? '🔍 Zoom In' : '🔍 Zoom Out';
+    }
+  }
+  
+  showWorkspaceInitModal() {
+    const modal = document.getElementById('workspace-init-modal');
+    const directoryField = document.getElementById('workspace-directory');
+    
+    // Show modal
+    if (modal) {
+      modal.classList.remove('hidden');
+      // Focus on directory field
+      setTimeout(() => {
+        if (directoryField) directoryField.focus();
+      }, 100);
+    }
+  }
+  
+  hideWorkspaceInitModal() {
+    const modal = document.getElementById('workspace-init-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+  }
+  
+  async handleWorkspaceInit() {
+    const directoryField = document.getElementById('workspace-directory');
+    const initBtn = document.getElementById('init-workspace-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    
+    const directory = directoryField?.value.trim();
+    
+    // Validation
+    if (!directory) {
+      if (directoryField) {
+        directoryField.focus();
+        directoryField.style.borderColor = '#ef4444';
+        setTimeout(() => {
+          directoryField.style.borderColor = '';
+        }, 2000);
+      }
+      return;
+    }
+    
+    // Show loading state
+    const originalText = initBtn?.textContent;
+    if (initBtn) {
+      initBtn.textContent = '🔄 Initializing...';
+      initBtn.disabled = true;
+    }
+    
+    try {
+      console.log('🏗️ Workspace initialization requested for:', directory);
+      
+      const response = await fetch('/api/workspace/init', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ directory })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('✅ Workspace initialized successfully:', data.result);
+        
+        // Hide modal
+        this.hideWorkspaceInitModal();
+        
+        // Show success message in chat
+        if (chatMessages) {
+          const successMessage = document.createElement('div');
+          successMessage.className = 'chat-message ai-message';
+          successMessage.innerHTML = `
+            <strong>✅ Workspace Initialized:</strong>
+            <p><strong>Location:</strong> ${this.escapeHtml(data.result.directory)}</p>
+            <p><strong>Created Files:</strong></p>
+            <ul>
+              ${data.result.created_files.map(file => `<li>${this.escapeHtml(file)}</li>`).join('')}
+            </ul>
+            <p><strong>Next Steps:</strong></p>
+            <ul>
+              ${data.result.next_steps.map(step => `<li>${this.escapeHtml(step)}</li>`).join('')}
+            </ul>
+          `;
+          chatMessages.appendChild(successMessage);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Log activity
+        this.addActivityItem(`Initialized workspace: ${directory}`, 'just now');
+        
+      } else {
+        throw new Error(data.error || 'Failed to initialize workspace');
+      }
+      
+    } catch (error) {
+      console.error('Error initializing workspace:', error);
+      
+      // Show error message
+      if (chatMessages) {
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'chat-message ai-message';
+        errorMessage.innerHTML = `
+          <strong>⚠️ Workspace Initialization Error:</strong>
+          <p>Failed to initialize workspace: ${this.escapeHtml(error.message)}</p>
+        `;
+        chatMessages.appendChild(errorMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+      
+    } finally {
+      // Reset button state
+      if (initBtn && originalText) {
+        initBtn.textContent = originalText;
+        initBtn.disabled = false;
+      }
     }
   }
 

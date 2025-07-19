@@ -75,7 +75,14 @@
         <div class="ai-controls">
             <button id="ai-status-btn" class="ai-button">🧠 AI Status Analysis</button>
             <button id="ai-coordinate-btn" class="ai-button">🔗 Coordinate Tasks</button>
-            <button id="ai-reflect-btn" class="ai-button" disabled>✨ AI Reflection</button>
+            <button id="ai-reflect-btn" class="ai-button">✨ AI Reflection</button>
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="navigation-controls">
+            <button id="zoom-in-btn" class="nav-button">🔍 Zoom In</button>
+            <button id="zoom-out-btn" class="nav-button">🔍 Zoom Out</button>
+            <button id="workspace-init-btn" class="nav-button">🏗️ Init Workspace</button>
         </div>
 
         <!-- Chat Interface -->
@@ -128,6 +135,36 @@
             <div class="modal-footer">
                 <button id="cancel-project-btn" class="btn-secondary">Cancel</button>
                 <button id="save-project-btn" class="btn-primary">Create Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workspace Initialization Modal -->
+    <div id="workspace-init-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Initialize New Workspace</h3>
+                <button class="modal-close" id="workspace-modal-close-btn">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Initialize a new productivity workspace with the essential file structure.</p>
+                <div class="form-group">
+                    <label for="workspace-directory">Workspace Directory</label>
+                    <input type="text" id="workspace-directory" placeholder="/data/data/com.termux/files/home/my-workspace" value="/data/data/com.termux/files/home/new-workspace" />
+                </div>
+                <div class="workspace-info">
+                    <h4>This will create:</h4>
+                    <ul>
+                        <li>📄 README.md - Workspace overview</li>
+                        <li>📋 plan.md - Current focus and priorities</li>
+                        <li>📁 projects/ - Project files directory</li>
+                        <li>🔍 .gitignore - Version control settings</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-workspace-btn" class="btn-secondary">Cancel</button>
+                <button id="init-workspace-btn" class="btn-primary">Initialize Workspace</button>
             </div>
         </div>
     </div>
