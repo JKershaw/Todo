@@ -1,1 +1,1 @@
-web: cd web-dashboard && npm start
+web: node web-dashboard/server/index.js

@@ -66,6 +66,7 @@ Build tools that amplify human thinking without replacing human judgment.
 - [x] Ensure web interface uses PORT environment variable for server startup
 - [x] Create Procfile for web dashboard deployment
 - [x] Update package.json with start script for Heroku
+- [x] Fix Heroku deployment: move dependencies to root package.json and update Procfile path
 
 ## Completed - **PROJECT 95% COMPLETE** 🎉
 - [x] Define system philosophy
