@@ -57,6 +57,87 @@ app.get('/api/projects', async (req, res) => {
   }
 });
 
+app.get('/api/focus-flow', async (req, res) => {
+  try {
+    const projectsDir = path.join(WORKSPACE_PATH, 'projects');
+    const files = await fs.readdir(projectsDir);
+    const focusData = {
+      level0Tasks: [],
+      projectConnections: {},
+      progressSummary: {}
+    };
+    
+    for (const file of files) {
+      if (file.endsWith('.md')) {
+        const content = await fs.readFile(path.join(projectsDir, file), 'utf-8');
+        const lines = content.split('\\n');
+        const projectName = lines[0]?.replace('# Project: ', '') || file;
+        
+        // Extract Level 0 tasks (next 15 minutes)
+        let inLevel0Section = false;
+        let level0Tasks = [];
+        
+        for (const line of lines) {
+          // Look for Level 0 section headers - various formats
+          if ((line.includes('Level 0') && (line.includes('Next 15 minutes') || line.includes('Immediate'))) ||
+              line.includes('## Level 0 Actions') ||
+              (line.includes('Level 0') && line.startsWith('##'))) {
+            inLevel0Section = true;
+            continue;
+          }
+          
+          if (inLevel0Section) {
+            // End section on next major header (but not subheadings)
+            if (line.startsWith('##') && 
+                !line.includes('Level 0') && 
+                !line.startsWith('###')) {
+              break;
+            }
+            
+            if (line.trim().startsWith('- [ ]')) {
+              const task = line.trim().replace('- [ ]', '').trim();
+              if (task) {
+                level0Tasks.push({
+                  task,
+                  project: projectName,
+                  file,
+                  completed: false
+                });
+              }
+            } else if (line.trim().startsWith('- [x]')) {
+              const task = line.trim().replace('- [x]', '').trim();
+              if (task) {
+                level0Tasks.push({
+                  task,
+                  project: projectName,
+                  file,
+                  completed: true
+                });
+              }
+            }
+          }
+        }
+        
+        // Add to focus data
+        focusData.level0Tasks.push(...level0Tasks.filter(t => !t.completed).slice(0, 2)); // Max 2 per project
+        focusData.projectConnections[projectName] = {
+          totalLevel0: level0Tasks.length,
+          completed: level0Tasks.filter(t => t.completed).length,
+          file
+        };
+      }
+    }
+    
+    // Limit to top 5 Level 0 tasks as per original vision
+    focusData.level0Tasks = focusData.level0Tasks.slice(0, 5);
+    
+    res.json(focusData);
+  } catch (error) {
+    console.error('Error generating focus flow data:', error);
+    res.status(500).json({ error: 'Failed to generate focus flow data' });
+  }
+});
+
 // WebSocket connections
 io.on('connection', (socket) => {
   console.log('User connected to dashboard');
@@ -100,11 +181,37 @@ server.listen(PORT, () => {
 });
 
 // Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('\\n👋 Shutting down dashboard server...');
+function gracefulShutdown(signal) {
+  console.log(`\\n👋 Received ${signal}, shutting down dashboard server...`);
   watcher.close();
-  server.close(() => {
-    console.log('✅ Dashboard server closed');
+  
+  server.close((err) => {
+    if (err) {
+      console.error('❌ Error closing server:', err);
+      process.exit(1);
+    }
+    console.log('✅ Dashboard server closed cleanly');
     process.exit(0);
   });
+  
+  // Force exit after 5 seconds if graceful shutdown fails
+  setTimeout(() => {
+    console.log('⚠️  Forcing exit after timeout');
+    process.exit(1);
+  }, 5000);
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGUSR2', () => gracefulShutdown('SIGUSR2')); // nodemon restart
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err);
+  gracefulShutdown('uncaughtException');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  gracefulShutdown('unhandledRejection');
 });

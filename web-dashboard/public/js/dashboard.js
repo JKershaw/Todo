@@ -43,6 +43,7 @@ class ProductivityDashboard {
       
       // Refresh data after file changes
       setTimeout(() => {
+        this.loadFocusFlowData();
         this.loadWorkspaceData();
         this.loadProjectsData();
       }, 500);
@@ -78,6 +79,7 @@ class ProductivityDashboard {
 
     // Auto-refresh every 30 seconds
     setInterval(() => {
+      this.loadFocusFlowData();
       this.loadWorkspaceData();
       this.loadProjectsData();
     }, 30000);
@@ -85,9 +87,73 @@ class ProductivityDashboard {
 
   async loadInitialData() {
     await Promise.all([
+      this.loadFocusFlowData(),
       this.loadWorkspaceData(),
       this.loadProjectsData()
     ]);
+  }
+
+  async loadFocusFlowData() {
+    try {
+      const response = await fetch('/api/focus-flow');
+      const data = await response.json();
+      
+      const focusFlowContent = document.getElementById('focus-flow-content');
+      
+      if (data.level0Tasks && data.level0Tasks.length > 0) {
+        const tasksHtml = data.level0Tasks.map((task, index) => `
+          <div class="focus-task" data-task-index="${index}">
+            <div class="focus-task-content">${this.escapeHtml(task.task)}</div>
+            <div class="focus-task-project">Connected to: ${this.escapeHtml(task.project)}</div>
+          </div>
+        `).join('');
+        
+        focusFlowContent.innerHTML = tasksHtml;
+        
+        // Add click handlers for task completion
+        const focusTasks = focusFlowContent.querySelectorAll('.focus-task');
+        focusTasks.forEach(taskElement => {
+          taskElement.addEventListener('click', () => {
+            const taskIndex = taskElement.dataset.taskIndex;
+            const task = data.level0Tasks[taskIndex];
+            this.handleTaskClick(task, taskElement);
+          });
+        });
+        
+      } else {
+        focusFlowContent.innerHTML = `
+          <div class="focus-task">
+            <div class="focus-task-content">🎉 No immediate tasks! Time to plan or take a break.</div>
+            <div class="focus-task-project">Consider using "reflect" command to analyze your progress</div>
+          </div>
+        `;
+      }
+      
+    } catch (error) {
+      console.error('Error loading focus flow data:', error);
+      const focusFlowContent = document.getElementById('focus-flow-content');
+      focusFlowContent.innerHTML = '<div class="loading">Failed to load focus tasks</div>';
+    }
+  }
+
+  handleTaskClick(task, taskElement) {
+    // Visual feedback for task completion
+    taskElement.style.opacity = '0.7';
+    taskElement.style.borderColor = 'var(--success-color)';
+    
+    // Add completion indicator
+    const completionIndicator = document.createElement('div');
+    completionIndicator.innerHTML = '✅ Completed!';
+    completionIndicator.style.color = 'var(--success-color)';
+    completionIndicator.style.fontSize = '0.875rem';
+    completionIndicator.style.marginTop = '0.5rem';
+    taskElement.appendChild(completionIndicator);
+    
+    // Log activity
+    this.addActivityItem(`Completed: ${task.task}`, 'just now');
+    
+    // In a full implementation, this would update the markdown file
+    console.log('Task completed:', task);
   }
 
   async loadWorkspaceData() {

@@ -18,23 +18,43 @@
         </header>
 
         <main class="main">
-            <div class="grid">
-                <!-- Workspace Overview -->
-                <section class="card workspace-card">
-                    <h2>📋 Workspace Status</h2>
-                    <div id="workspace-content" class="content">
-                        <div class="loading">Loading workspace...</div>
-                    </div>
-                </section>
+            <!-- Focus Flow Interface - Core Original Vision -->
+            <section class="focus-flow-container">
+                <div class="focus-flow-header">
+                    <h1>🎯 What should I do right now?</h1>
+                    <p class="focus-subtitle">Your next 3-5 immediate actions (5-15 minutes each)</p>
+                </div>
+                
+                <div id="focus-flow-content" class="focus-flow-content">
+                    <div class="loading">Loading your immediate focus tasks...</div>
+                </div>
+                
+                <div class="zoom-out-indicator">
+                    <span class="zoom-hint">⬇ Scroll to see how these connect to larger goals</span>
+                </div>
+            </section>
 
-                <!-- Active Projects -->
-                <section class="card projects-card">
-                    <h2>🚀 Active Projects</h2>
+            <!-- Progressive Zoom Out - Context Layers -->
+            <div class="context-layers">
+                <!-- Level 1-2: Project Context -->
+                <section class="context-layer project-context">
+                    <h2>🚀 These tasks connect to your active projects:</h2>
                     <div id="projects-content" class="content">
-                        <div class="loading">Loading projects...</div>
+                        <div class="loading">Loading project context...</div>
                     </div>
                 </section>
 
+                <!-- Level 3-4: Higher Purpose -->
+                <section class="context-layer purpose-context">
+                    <h2>📋 Your broader workspace goals:</h2>
+                    <div id="workspace-content" class="content">
+                        <div class="loading">Loading workspace context...</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Supporting Information Grid -->
+            <div class="grid supporting-info">
                 <!-- Activity Feed -->
                 <section class="card activity-card">
                     <h2>⚡ Recent Activity</h2>
