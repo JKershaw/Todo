@@ -30,6 +30,10 @@ A minimal, markdown-based, local-first personal productivity system for develope
 
 4. **Set up AI integration** (optional but recommended)
    ```bash
+   # Create .env file in project root
+   echo "ANTHROPIC_API_KEY=your_api_key_here" > .env
+   
+   # Or export directly
    export ANTHROPIC_API_KEY=your_api_key_here
    ```
 

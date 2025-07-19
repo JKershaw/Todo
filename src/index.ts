@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 
+import { config } from 'dotenv';
 import { Command } from 'commander';
+import * as path from 'path';
+
+// Load .env from multiple possible locations
+config({ path: path.join(__dirname, '../.env') }); // Build directory
+config({ path: path.join(process.cwd(), '.env') }); // Current directory
+config(); // Default behavior
 import chalk from 'chalk';
 import { initCommand } from './commands/init';
 import { statusCommand } from './commands/status';
