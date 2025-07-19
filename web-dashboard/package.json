@@ -21,6 +21,9 @@
   "devDependencies": {
     "@types/express": "^4.17.17"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "keywords": ["productivity", "dashboard", "real-time", "express"],
   "author": "Productivity System",
   "license": "MIT"

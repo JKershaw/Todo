@@ -139,6 +139,153 @@ app.get('/api/focus-flow', async (req, res) => {
   }
 });
 
+// Plan mode - hierarchical goal structure
+app.get('/api/plan-view', async (req, res) => {
+  try {
+    const projectsDir = path.join(WORKSPACE_PATH, 'projects');
+    const files = await fs.readdir(projectsDir);
+    const planData = {
+      goalSections: [],
+      projectHierarchy: {}
+    };
+    
+    for (const file of files) {
+      if (file.endsWith('.md')) {
+        const content = await fs.readFile(path.join(projectsDir, file), 'utf-8');
+        const lines = content.split('\n');
+        const projectName = lines[0]?.replace('# Project: ', '') || file;
+        
+        // Extract tasks by level
+        const levels = {
+          0: [],  // Today
+          1: [],  // This week  
+          2: [],  // Current projects
+          3: [],  // Quarterly
+          4: []   // Life goals
+        };
+        
+        let currentLevel = null;
+        for (const line of lines) {
+          // Detect level sections
+          if (line.includes('Level 4') && (line.includes('Life Goal') || line.includes('Annual'))) {
+            currentLevel = 4;
+            continue;
+          } else if (line.includes('Level 3') && (line.includes('Quarterly') || line.includes('Milestones'))) {
+            currentLevel = 3;
+            continue;
+          } else if (line.includes('Level 2') && (line.includes('Projects') || line.includes('Sprint'))) {
+            currentLevel = 2;
+            continue;
+          } else if (line.includes('Level 1') && (line.includes('Week') || line.includes('Daily'))) {
+            currentLevel = 1;
+            continue;
+          } else if (line.includes('Level 0') && (line.includes('Actions') || line.includes('Today'))) {
+            currentLevel = 0;
+            continue;
+          }
+          
+          // Reset level on new major section
+          if (line.startsWith('##') && !line.includes('Level')) {
+            currentLevel = null;
+          }
+          
+          // Extract tasks
+          if (currentLevel !== null && (line.includes('- [ ]') || line.includes('- [x]'))) {
+            const task = line.trim().replace(/- \[[ x]\]\s*/, '');
+            const completed = line.includes('- [x]');
+            if (task) {
+              levels[currentLevel].push({
+                task,
+                completed,
+                project: projectName,
+                file
+              });
+            }
+          }
+        }
+        
+        planData.projectHierarchy[projectName] = levels;
+      }
+    }
+    
+    res.json(planData);
+  } catch (error) {
+    console.error('Error generating plan view data:', error);
+    res.status(500).json({ error: 'Failed to generate plan view data' });
+  }
+});
+
+// Reflect mode - momentum and insights
+app.get('/api/reflect-data', async (req, res) => {
+  try {
+    const projectsDir = path.join(WORKSPACE_PATH, 'projects');
+    const files = await fs.readdir(projectsDir);
+    const reflectData = {
+      momentumBars: [],
+      insights: [],
+      completionStats: {}
+    };
+    
+    for (const file of files) {
+      if (file.endsWith('.md')) {
+        const content = await fs.readFile(path.join(projectsDir, file), 'utf-8');
+        const lines = content.split('\n');
+        const projectName = lines[0]?.replace('# Project: ', '') || file;
+        
+        // Count completion stats
+        let totalTasks = 0;
+        let completedTasks = 0;
+        
+        for (const line of lines) {
+          if (line.includes('- [ ]')) {
+            totalTasks++;
+          } else if (line.includes('- [x]')) {
+            totalTasks++;
+            completedTasks++;
+          }
+        }
+        
+        const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+        
+        reflectData.momentumBars.push({
+          title: projectName,
+          completionRate,
+          totalTasks,
+          completedTasks,
+          description: `${completedTasks}/${totalTasks} tasks completed`
+        });
+        
+        reflectData.completionStats[projectName] = {
+          totalTasks,
+          completedTasks,
+          completionRate
+        };
+      }
+    }
+    
+    // Add some example insights
+    reflectData.insights = [
+      {
+        title: "This Week's Progress",
+        description: `${reflectData.momentumBars.length} active projects with ${reflectData.momentumBars.reduce((acc, bar) => acc + bar.completedTasks, 0)} completed tasks`
+      },
+      {
+        title: "High Momentum Projects", 
+        description: reflectData.momentumBars.filter(bar => bar.completionRate > 70).map(bar => bar.title).join(', ') || 'Focus on completing current tasks'
+      },
+      {
+        title: "Areas Needing Attention",
+        description: reflectData.momentumBars.filter(bar => bar.completionRate < 30).map(bar => bar.title).join(', ') || 'All projects progressing well'
+      }
+    ];
+    
+    res.json(reflectData);
+  } catch (error) {
+    console.error('Error generating reflect data:', error);
+    res.status(500).json({ error: 'Failed to generate reflect data' });
+  }
+});
+
 // Task completion endpoint
 app.post('/api/tasks/complete', async (req, res) => {
   try {

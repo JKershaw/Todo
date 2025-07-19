@@ -47,6 +47,7 @@ Build tools that amplify human thinking without replacing human judgment.
 - [x] Create end-to-end test suite
 - [x] Implement reflect command
 - [x] Add project lifecycle management
+- [ ] Set up Heroku deployment with Procfile and package.json configuration
 
 ## Level 0 Actions (Next 15 minutes)
 - [x] Add dotenv package for .env file loading
@@ -63,6 +64,8 @@ Build tools that amplify human thinking without replacing human judgment.
 - [x] Add AI task relationship suggestions for intelligent coordination
 - [x] Implement task completion tracking in dashboard interface
 - [x] Ensure web interface uses PORT environment variable for server startup
+- [x] Create Procfile for web dashboard deployment
+- [x] Update package.json with start script for Heroku
 
 ## Completed - **PROJECT 95% COMPLETE** 🎉
 - [x] Define system philosophy

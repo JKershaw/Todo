@@ -131,9 +131,127 @@ class ProductivityDashboard {
   async loadInitialData() {
     await Promise.all([
       this.loadFocusFlowData(),
-      this.loadWorkspaceData(),
-      this.loadProjectsData()
+      this.loadPlanViewData(),
+      this.loadReflectData()
     ]);
+  }
+
+  async loadPlanViewData() {
+    try {
+      const response = await fetch('/api/plan-view');
+      const data = await response.json();
+      
+      const planContent = document.getElementById('plan-content');
+      
+      if (data.projectHierarchy && Object.keys(data.projectHierarchy).length > 0) {
+        let planHtml = '';
+        
+        // Build hierarchical view - Level 4 (Life Goals) down to Level 0 (Today)
+        for (let level = 4; level >= 0; level--) {
+          const levelNames = {
+            4: 'Life Goals',
+            3: 'Quarterly Milestones',
+            2: 'Current Projects', 
+            1: 'This Week',
+            0: 'Today'
+          };
+          
+          let hasTasksAtLevel = false;
+          let levelHtml = `<div class="plan-level">
+            <h3 class="level-title">${levelNames[level]}</h3>
+            <div class="level-tasks">`;
+          
+          Object.keys(data.projectHierarchy).forEach(projectName => {
+            const projectLevels = data.projectHierarchy[projectName];
+            if (projectLevels[level] && projectLevels[level].length > 0) {
+              hasTasksAtLevel = true;
+              levelHtml += `<div class="project-section">
+                <div class="project-name">${this.escapeHtml(projectName)}</div>`;
+              
+              projectLevels[level].forEach(task => {
+                const taskClass = task.completed ? 'completed' : 'pending';
+                const checkIcon = task.completed ? '✅' : '◯';
+                levelHtml += `
+                  <div class="plan-task ${taskClass}">
+                    <span class="task-check">${checkIcon}</span>
+                    <span class="task-text">${this.escapeHtml(task.task)}</span>
+                  </div>`;
+              });
+              
+              levelHtml += '</div>';
+            }
+          });
+          
+          levelHtml += '</div></div>';
+          
+          if (hasTasksAtLevel) {
+            planHtml += levelHtml;
+          }
+        }
+        
+        planContent.innerHTML = planHtml || '<div class="empty-state">No plan data found</div>';
+      } else {
+        planContent.innerHTML = '<div class="empty-state">No projects found</div>';
+      }
+      
+    } catch (error) {
+      console.error('Error loading plan view data:', error);
+      const planContent = document.getElementById('plan-content');
+      planContent.innerHTML = '<div class="loading">Failed to load plan view</div>';
+    }
+  }
+
+  async loadReflectData() {
+    try {
+      const response = await fetch('/api/reflect-data');
+      const data = await response.json();
+      
+      const reflectContent = document.getElementById('reflect-content');
+      
+      if (data.momentumBars && data.momentumBars.length > 0) {
+        let reflectHtml = '<div class="momentum-section">';
+        
+        // Momentum bars
+        reflectHtml += '<h3>Project Momentum</h3>';
+        data.momentumBars.forEach(bar => {
+          reflectHtml += `
+            <div class="momentum-bar-container">
+              <div class="momentum-bar-header">
+                <span class="momentum-title">${this.escapeHtml(bar.title)}</span>
+                <span class="momentum-percentage">${bar.completionRate}%</span>
+              </div>
+              <div class="momentum-bar">
+                <div class="momentum-fill" style="width: ${bar.completionRate}%"></div>
+              </div>
+              <div class="momentum-description">${this.escapeHtml(bar.description)}</div>
+            </div>`;
+        });
+        
+        reflectHtml += '</div>';
+        
+        // Insights section
+        if (data.insights && data.insights.length > 0) {
+          reflectHtml += '<div class="insights-section"><h3>Insights</h3>';
+          data.insights.forEach(insight => {
+            reflectHtml += `
+              <div class="insight-card">
+                <div class="insight-title">${this.escapeHtml(insight.title)}</div>
+                <div class="insight-description">${this.escapeHtml(insight.description)}</div>
+              </div>`;
+          });
+          reflectHtml += '</div>';
+        }
+        
+        reflectContent.innerHTML = reflectHtml;
+      } else {
+        reflectContent.innerHTML = '<div class="empty-state">No reflection data available</div>';
+      }
+      
+    } catch (error) {
+      console.error('Error loading reflect data:', error);
+      const reflectContent = document.getElementById('reflect-content');
+      reflectContent.innerHTML = '<div class="loading">Failed to load reflection data</div>';
+    }
   }
 
   async loadFocusFlowData() {
