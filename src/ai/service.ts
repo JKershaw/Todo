@@ -31,7 +31,9 @@ export class AnthropicService implements AIService {
         messages: [
           {
             role: 'user',
-            content: `${context}\n\n${prompt}\n\nPlease respond with a JSON object containing:
+            content: `${context}\n\n${prompt}\n\n**IMPORTANT: You must respond with ONLY valid JSON. No additional text, explanations, or formatting outside the JSON object.**
+
+Required JSON format:
 {
   "analysis": "Brief analysis of the current state",
   "suggestions": ["List of actionable suggestions"],
@@ -44,7 +46,9 @@ export class AnthropicService implements AIService {
     }
   ],
   "reasoning": "Explanation of why these changes are recommended"
-}`
+}
+
+Response:`
           }
         ]
       });
@@ -55,13 +59,21 @@ export class AnthropicService implements AIService {
       }
 
       try {
-        return JSON.parse(content.text) as AIResponse;
+        // Try to extract JSON from the response in case there's extra text
+        const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+        const jsonText = jsonMatch ? jsonMatch[0] : content.text;
+        return JSON.parse(jsonText) as AIResponse;
       } catch (parseError) {
+        console.warn('AI JSON parsing failed:', parseError);
+        console.warn('Raw AI response:', content.text);
         return {
-          analysis: content.text,
-          suggestions: ['Review the AI response and take appropriate action'],
+          analysis: content.text.substring(0, 500), // First 500 chars as analysis
+          suggestions: [
+            'AI response was not in JSON format - check the raw response',
+            'Consider adjusting AI prompts for better structured responses'
+          ],
           proposed_changes: [],
-          reasoning: 'AI response was not in expected JSON format'
+          reasoning: `AI response parsing failed: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`
         };
       }
     } catch (error) {
