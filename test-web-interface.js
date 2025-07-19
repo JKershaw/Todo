@@ -191,6 +191,49 @@ async function runTests() {
       failed++;
     }
     
+    // Test 9: Project Details endpoint
+    console.log('\n9️⃣  Testing Project Details endpoint...');
+    const testProject = 'web-interface-completion';
+    const projectDetailsResponse = await makeRequest(`/api/projects/${testProject}`, 'GET');
+    
+    if (projectDetailsResponse.status === 200 && 
+        projectDetailsResponse.data.success && 
+        projectDetailsResponse.data.project.tasks) {
+      console.log('✅ Project Details: PASSED');
+      console.log(`   Project: ${projectDetailsResponse.data.project.displayName}`);
+      console.log(`   Tasks: ${projectDetailsResponse.data.project.totalTasks} total, ${projectDetailsResponse.data.project.completedTasks} completed`);
+      console.log(`   Progress: ${projectDetailsResponse.data.project.completionRate}%`);
+      passed++;
+    } else {
+      console.log('❌ Project Details: FAILED');
+      console.log(`   Status: ${projectDetailsResponse.status}`);
+      console.log(`   Error: ${projectDetailsResponse.data.error || 'Unknown error'}`);
+      failed++;
+    }
+    
+    // Test 10: Add Task to Project endpoint
+    console.log('\n🔟 Testing Add Task to Project endpoint...');
+    const taskDescription = `Test task added at ${Date.now()}`;
+    const addTaskResponse = await makeRequest(`/api/projects/${testProject}/tasks`, 'POST', {
+      task: taskDescription,
+      level: 0
+    });
+    
+    if (addTaskResponse.status === 200 && 
+        addTaskResponse.data.success && 
+        addTaskResponse.data.task.description === taskDescription) {
+      console.log('✅ Add Task to Project: PASSED');
+      console.log(`   Task: "${addTaskResponse.data.task.description}"`);
+      console.log(`   Level: ${addTaskResponse.data.task.level}`);
+      console.log(`   Project: ${addTaskResponse.data.task.project}`);
+      passed++;
+    } else {
+      console.log('❌ Add Task to Project: FAILED');
+      console.log(`   Status: ${addTaskResponse.status}`);
+      console.log(`   Error: ${addTaskResponse.data.error || 'Unknown error'}`);
+      failed++;
+    }
+    
   } catch (error) {
     console.log('❌ Test suite failed with error:', error.message);
     failed++;

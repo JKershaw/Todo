@@ -1037,6 +1037,118 @@ body {
   line-height: 1.4;
 }
 
+/* Project Details Modal */
+.project-meta {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.project-meta p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.project-tasks {
+  margin-bottom: 24px;
+}
+
+.project-tasks h4,
+.add-task-section h4 {
+  margin: 0 0 16px 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 500;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.level-tasks {
+  margin-bottom: 20px;
+}
+
+.level-tasks h5 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.task-list .task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: none;
+  margin-bottom: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.task-list .task-item:last-child {
+  border-bottom: none;
+}
+
+.task-list .task-item.completed {
+  opacity: 0.6;
+}
+
+.task-list .task-item.completed .task-text {
+  text-decoration: line-through;
+}
+
+.task-check {
+  font-size: 14px;
+  min-width: 20px;
+  flex-shrink: 0;
+}
+
+.task-text {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.empty-tasks {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 14px;
+}
+
+.add-task-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.add-task-section .form-group {
+  margin-bottom: 12px;
+}
+
+.add-task-section label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.add-task-section input,
+.add-task-section select {
+  font-size: 13px;
+  padding: 10px;
+}
+
 /* Progress Recording Form */
 .progress-form {
   display: flex;

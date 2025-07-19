@@ -721,6 +721,206 @@ app.get('/api/projects/list', async (req, res) => {
   }
 });
 
+// Add task to project (step 6)
+app.post('/api/projects/:projectName/tasks', async (req, res) => {
+  try {
+    const { projectName } = req.params;
+    const { task, level } = req.body;
+    
+    if (!task || task.trim().length === 0) {
+      return res.status(400).json({ error: 'Task description is required' });
+    }
+    
+    if (level === undefined || level === null || ![0, 1, 2, 3, 4].includes(parseInt(level))) {
+      return res.status(400).json({ error: 'Valid task level (0-4) is required' });
+    }
+    
+    console.log(`📝 Adding task to project ${projectName}:`, task);
+    
+    const projectFile = `${projectName}.md`;
+    const projectPath = path.join(WORKSPACE_PATH, 'projects', projectFile);
+    
+    // Check if project exists
+    try {
+      await fs.access(projectPath);
+    } catch (e) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    // Read project content
+    const content = await fs.readFile(projectPath, 'utf-8');
+    const lines = content.split('\\n');
+    
+    // Find the appropriate level section
+    const levelNames = {
+      0: 'Level 0 Actions (Next 15 minutes)',
+      1: 'Level 1 Tasks (This Week)', 
+      2: 'Level 2 Tasks (Current Sprint)',
+      3: 'Level 3 Milestones (Quarterly)',
+      4: 'Level 4 Connection (Life Goal)'
+    };
+    
+    const targetSection = levelNames[parseInt(level)];
+    let insertIndex = -1;
+    let foundSection = false;
+    
+    // Find the target section
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].includes(targetSection) || 
+          (lines[i].startsWith('## Level') && lines[i].includes(`Level ${level}`))) {
+        foundSection = true;
+        continue;
+      }
+      
+      if (foundSection) {
+        // Look for the end of this section (next ## header or end of file)
+        if (lines[i].startsWith('## ') && !lines[i].includes(`Level ${level}`)) {
+          insertIndex = i;
+          break;
+        }
+      }
+    }
+    
+    // If no next section found, add at end of section
+    if (foundSection && insertIndex === -1) {
+      insertIndex = lines.length;
+    }
+    
+    if (!foundSection) {
+      return res.status(400).json({ error: `Level ${level} section not found in project` });
+    }
+    
+    // Insert the new task
+    const newTaskLine = `- [ ] ${task}`;
+    lines.splice(insertIndex, 0, newTaskLine);
+    
+    // Write back to file
+    await fs.writeFile(projectPath, lines.join('\\n'), 'utf-8');
+    
+    console.log(`✅ Task added to ${projectName} at Level ${level}`);
+    res.json({
+      success: true,
+      message: 'Task added successfully',
+      task: {
+        description: task,
+        level: parseInt(level),
+        project: projectName,
+        completed: false
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error adding task to project:', error);
+    res.status(500).json({ error: 'Failed to add task to project' });
+  }
+});
+
+// Get project details with tasks (step 6)
+app.get('/api/projects/:projectName', async (req, res) => {
+  try {
+    const { projectName } = req.params;
+    console.log(`📋 Getting project details for: ${projectName}`);
+    
+    const projectFile = `${projectName}.md`;
+    const projectPath = path.join(WORKSPACE_PATH, 'projects', projectFile);
+    
+    // Check if project exists
+    try {
+      await fs.access(projectPath);
+    } catch (e) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    const content = await fs.readFile(projectPath, 'utf-8');
+    const lines = content.split('\\n');
+    
+    // Parse project details
+    let projectDetails = {
+      name: projectName,
+      displayName: projectName.replace(/-/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase()),
+      status: 'Active',
+      level: 2,
+      goal: '',
+      tasks: {
+        0: [], 1: [], 2: [], 3: [], 4: []
+      },
+      totalTasks: 0,
+      completedTasks: 0
+    };
+    
+    // Extract project metadata and tasks
+    let currentLevel = null;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      // Extract metadata
+      if (line.startsWith('**Status:**')) {
+        projectDetails.status = line.replace('**Status:**', '').trim();
+      }
+      if (line.startsWith('**Level:**')) {
+        projectDetails.level = parseInt(line.replace('**Level:**', '').trim()) || 2;
+      }
+      if (line.startsWith('## Goal')) {
+        const goalIndex = i;
+        if (lines[goalIndex + 1]) {
+          projectDetails.goal = lines[goalIndex + 1].trim();
+        }
+      }
+      
+      // Detect level sections
+      if (line.includes('Level 4') && (line.includes('Life Goal') || line.includes('Connection'))) {
+        currentLevel = 4;
+        continue;
+      } else if (line.includes('Level 3') && (line.includes('Quarterly') || line.includes('Milestones'))) {
+        currentLevel = 3;
+        continue;
+      } else if (line.includes('Level 2') && (line.includes('Projects') || line.includes('Sprint') || line.includes('Tasks'))) {
+        currentLevel = 2;
+        continue;
+      } else if (line.includes('Level 1') && (line.includes('Week') || line.includes('Tasks'))) {
+        currentLevel = 1;
+        continue;
+      } else if (line.includes('Level 0') && (line.includes('Actions') || line.includes('minutes'))) {
+        currentLevel = 0;
+        continue;
+      }
+      
+      // Reset level on new major section
+      if (line.startsWith('##') && !line.includes('Level')) {
+        currentLevel = null;
+      }
+      
+      // Extract tasks
+      if (currentLevel !== null && (line.includes('- [ ]') || line.includes('- [x]'))) {
+        const task = line.trim().replace(/- \[[ x]\]\s*/, '');
+        const completed = line.includes('- [x]');
+        if (task) {
+          projectDetails.tasks[currentLevel].push({
+            description: task,
+            completed,
+            level: currentLevel
+          });
+          projectDetails.totalTasks++;
+          if (completed) projectDetails.completedTasks++;
+        }
+      }
+    }
+    
+    projectDetails.completionRate = projectDetails.totalTasks > 0 ? 
+      Math.round((projectDetails.completedTasks / projectDetails.totalTasks) * 100) : 0;
+    
+    console.log(`✅ Project details loaded for ${projectName}`);
+    res.json({
+      success: true,
+      project: projectDetails
+    });
+    
+  } catch (error) {
+    console.error('Error getting project details:', error);
+    res.status(500).json({ error: 'Failed to get project details' });
+  }
+});
+
 // Create new project  
 app.post('/api/projects/create', async (req, res) => {
   try {

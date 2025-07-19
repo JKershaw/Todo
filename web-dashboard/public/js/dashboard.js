@@ -1414,11 +1414,199 @@ class ProductivityDashboard {
     }
   }
   
-  // Placeholder methods for project actions
-  viewProject(projectName) {
+  // Project action methods
+  async viewProject(projectName) {
     console.log('📋 View project:', projectName);
-    // TODO: Implement project details view
-    this.addChatMessage(`Opening project: ${projectName}`, false);
+    
+    try {
+      const response = await fetch(`/api/projects/${projectName}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        // Show project details in a modal or dedicated view
+        this.showProjectDetailsModal(data.project);
+      } else {
+        throw new Error(data.error || 'Failed to load project');
+      }
+      
+    } catch (error) {
+      console.error('Error loading project details:', error);
+      this.addChatMessage(`Failed to open project: ${error.message}`, false);
+    }
+  }
+  
+  showProjectDetailsModal(project) {
+    // Create a detailed project view modal
+    const modalHtml = `
+      <div id="project-details-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>📋 ${this.escapeHtml(project.displayName)}</h3>
+            <button class="modal-close" onclick="this.hideProjectDetailsModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="project-meta">
+              <p><strong>Status:</strong> ${this.escapeHtml(project.status)}</p>
+              <p><strong>Goal:</strong> ${this.escapeHtml(project.goal)}</p>
+              <p><strong>Progress:</strong> ${project.completionRate}% (${project.completedTasks}/${project.totalTasks} tasks)</p>
+            </div>
+            
+            <div class="project-tasks">
+              <h4>📝 Tasks by Level</h4>
+              ${this.renderTasksByLevel(project.tasks)}
+            </div>
+            
+            <div class="add-task-section">
+              <h4>➕ Add New Task</h4>
+              <form id="add-task-form">
+                <div class="form-group">
+                  <label for="task-description">Task Description</label>
+                  <input type="text" id="task-description" placeholder="Enter task description..." />
+                </div>
+                <div class="form-group">
+                  <label for="task-level">Task Level</label>
+                  <select id="task-level">
+                    <option value="0">Level 0 - Next 15 minutes</option>
+                    <option value="1">Level 1 - This Week</option>
+                    <option value="2" selected>Level 2 - Current Sprint</option>
+                    <option value="3">Level 3 - Quarterly</option>
+                    <option value="4">Level 4 - Life Goal</option>
+                  </select>
+                </div>
+                <button type="button" class="btn-primary" onclick="dashboard.addTaskToProject('${project.name}')">Add Task</button>
+              </form>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-secondary" onclick="dashboard.hideProjectDetailsModal()">Close</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Remove existing modal if present
+    const existing = document.getElementById('project-details-modal');
+    if (existing) existing.remove();
+    
+    // Add new modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  }
+  
+  renderTasksByLevel(tasks) {
+    const levelNames = {
+      0: 'Level 0 - Next 15 minutes',
+      1: 'Level 1 - This Week',
+      2: 'Level 2 - Current Sprint', 
+      3: 'Level 3 - Quarterly',
+      4: 'Level 4 - Life Goal'
+    };
+    
+    let html = '';
+    for (let level = 0; level <= 4; level++) {
+      const levelTasks = tasks[level] || [];
+      if (levelTasks.length > 0) {
+        html += `
+          <div class="level-tasks">
+            <h5>${levelNames[level]}</h5>
+            <ul class="task-list">
+              ${levelTasks.map(task => `
+                <li class="task-item ${task.completed ? 'completed' : ''}">
+                  <span class="task-check">${task.completed ? '✅' : '◯'}</span>
+                  <span class="task-text">${this.escapeHtml(task.description)}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        `;
+      }
+    }
+    
+    return html || '<p class="empty-tasks">No tasks found. Add your first task below!</p>';
+  }
+  
+  hideProjectDetailsModal() {
+    const modal = document.getElementById('project-details-modal');
+    if (modal) modal.remove();
+  }
+  
+  async addTaskToProject(projectName) {
+    const taskInput = document.getElementById('task-description');
+    const levelSelect = document.getElementById('task-level');
+    
+    const task = taskInput?.value.trim();
+    const level = levelSelect?.value;
+    
+    if (!task) {
+      if (taskInput) {
+        taskInput.focus();
+        taskInput.style.borderColor = '#ef4444';
+        setTimeout(() => {
+          taskInput.style.borderColor = '';
+        }, 2000);
+      }
+      return;
+    }
+    
+    try {
+      console.log(`📝 Adding task to ${projectName}:`, task);
+      
+      const response = await fetch(`/api/projects/${projectName}/tasks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ task, level: parseInt(level) })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('✅ Task added successfully:', data.task);
+        
+        // Clear form
+        if (taskInput) taskInput.value = '';
+        if (levelSelect) levelSelect.value = '2';
+        
+        // Show success in chat
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
+          const successMessage = document.createElement('div');
+          successMessage.className = 'chat-message ai-message';
+          successMessage.innerHTML = `
+            <strong>✅ Task Added:</strong>
+            <p><strong>"${this.escapeHtml(data.task.description)}"</strong> added to ${this.escapeHtml(projectName)} at Level ${data.task.level}</p>
+          `;
+          chatMessages.appendChild(successMessage);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Refresh the project details modal
+        this.hideProjectDetailsModal();
+        setTimeout(() => {
+          this.viewProject(projectName);
+        }, 100);
+        
+        this.addActivityItem(`Added task to ${projectName}: ${task}`, 'just now');
+        
+      } else {
+        throw new Error(data.error || 'Failed to add task');
+      }
+      
+    } catch (error) {
+      console.error('Error adding task:', error);
+      
+      const chatMessages = document.getElementById('chat-messages');
+      if (chatMessages) {
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'chat-message ai-message';
+        errorMessage.innerHTML = `
+          <strong>⚠️ Task Addition Error:</strong>
+          <p>Failed to add task: ${this.escapeHtml(error.message)}</p>
+        `;
+        chatMessages.appendChild(errorMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
   }
   
   editProject(projectName) {
