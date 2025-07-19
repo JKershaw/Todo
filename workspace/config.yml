@@ -1,0 +1,23 @@
+# Productivity System Configuration
+
+ai:
+  provider: "local"
+  model: "claude-3-haiku"
+  api_key_env: "ANTHROPIC_API_KEY"
+  max_tokens: 1000
+  temperature: 0.3
+
+system:
+  workspace_dir: "."
+  backup_enabled: true
+  auto_save: false
+  
+# Reflection schedule (in days)
+reflection:
+  weekly: 7
+  monthly: 30
+
+# Zoom level defaults
+zoom:
+  default_level: 1
+  show_context: true
