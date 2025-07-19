@@ -79,6 +79,30 @@ describe('End-to-End Workflow', () => {
     expect(reflectContent).toContain('Key Insights');
   });
 
+  it('should handle project commands', async () => {
+    const distPath = path.join(__dirname, '../../dist/index.js');
+    
+    // Test project creation
+    const { stdout: createOutput } = await execAsync(`node "${distPath}" project create "E2E Test Project" -d "${testDir}"`);
+    expect(createOutput).toContain('✓ Basic project created');
+    
+    // Test project list
+    const { stdout: listOutput } = await execAsync(`node "${distPath}" project list -d "${testDir}"`);
+    expect(listOutput).toContain('Projects Overview');
+    expect(listOutput).toContain('e2e-test-project');
+    
+    // Test project status
+    const { stdout: statusOutput } = await execAsync(`node "${distPath}" project status "E2E Test Project" -d "${testDir}"`);
+    expect(statusOutput).toContain('Project Status: e2e-test-project');
+    expect(statusOutput).toContain('Progress:');
+    
+    // Verify project file was created
+    const projectPath = path.join(testDir, 'projects', 'e2e-test-project.md');
+    const projectContent = await fs.readFile(projectPath, 'utf8');
+    expect(projectContent).toContain('# Project: E2E Test Project');
+    expect(projectContent).toContain('**Status:** Active');
+  });
+
   it('should handle missing workspace gracefully', async () => {
     const distPath = path.join(__dirname, '../../dist/index.js');
     const nonExistentDir = path.join(__dirname, 'non-existent-workspace');

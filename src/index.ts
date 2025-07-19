@@ -14,6 +14,7 @@ import { statusCommand } from './commands/status';
 import { saveCommand } from './commands/save';
 import { zoomCommand } from './commands/zoom';
 import { reflectCommand } from './commands/reflect';
+import { projectCommand } from './commands/project';
 
 const program = new Command();
 
@@ -67,13 +68,12 @@ program
 
 program
   .command('project')
-  .argument('<action>', 'Action: create, status, complete')
-  .argument('[name]', 'Project name')
+  .argument('<action>', 'Action: create, status, complete, list')
+  .argument('[name]', 'Project name (required for create, status, complete)')
   .description('Project lifecycle management')
   .option('-d, --directory <dir>', 'Workspace directory', '.')
   .action(async (action, name, options) => {
-    console.log(chalk.yellow('Project command not yet implemented'));
-    console.log(chalk.white(`Would ${action} project: ${name || 'current'}`));
+    await projectCommand(action as 'create' | 'status' | 'complete' | 'list', name, options.directory);
   });
 
 // Handle unknown commands
