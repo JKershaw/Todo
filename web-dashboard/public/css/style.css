@@ -61,10 +61,45 @@ body {
   min-height: 0; /* Allow flex children to shrink */
 }
 
-/* Desktop: Two-column layout */
-@media (min-width: 768px) {
+/* Desktop: Three-column layout */
+@media (min-width: 1024px) {
   .container {
-    max-width: 1400px;
+    max-width: 1600px;
+    padding: 24px;
+  }
+  
+  .main-layout {
+    flex-direction: row;
+    gap: 20px;
+  }
+  
+  .left-column {
+    flex: 2;
+    min-width: 0; /* Allow content to shrink */
+  }
+  
+  .middle-column {
+    flex: 1;
+    min-width: 300px;
+    max-width: 350px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .right-column {
+    flex: 1;
+    min-width: 280px;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+/* Tablet: Two-column layout (Tasks + Combined Chat/Tools) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .container {
+    max-width: 1200px;
     padding: 24px;
   }
   
@@ -75,13 +110,23 @@ body {
   
   .left-column {
     flex: 2;
-    min-width: 0; /* Allow content to shrink */
+    min-width: 0;
+  }
+  
+  .middle-column {
+    order: 3;
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
   }
   
   .right-column {
+    order: 2;
     flex: 1;
-    min-width: 320px;
-    max-width: 400px;
+    min-width: 280px;
+    max-width: 350px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -98,8 +143,14 @@ body {
     order: 1;
   }
   
-  .right-column {
+  .middle-column {
     order: 2;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .right-column {
+    order: 3;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -1578,7 +1629,15 @@ body {
   gap: 8px;
 }
 
-@media (min-width: 768px) {
+/* Three-column layout: single column buttons for narrow right column */
+@media (min-width: 1024px) {
+  .ai-buttons-grid, .nav-buttons-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Two-column layout: allow 2x2 grid for wider columns */
+@media (min-width: 768px) and (max-width: 1023px) {
   .ai-buttons-grid, .nav-buttons-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -1742,7 +1801,7 @@ body {
   fill: currentColor;
 }
 
-/* Mobile Adjustments for Right Column */
+/* Mobile Adjustments for Three Columns */
 @media (max-width: 767px) {
   .ai-buttons-grid, .nav-buttons-grid {
     grid-template-columns: 1fr 1fr;
@@ -1756,6 +1815,7 @@ body {
   
   .chat-section {
     min-height: 250px;
+    margin-bottom: 16px;
   }
   
   .chat-messages {
