@@ -26,83 +26,100 @@
             </div>
         </div>
 
-        <div class="content-area">
-            <!-- Do Mode Content -->
-            <div id="do-content" class="mode-content">
-                <div id="focus-flow-content" class="focus-flow-content">
-                    <div class="loading">Loading your immediate focus tasks...</div>
-                </div>
-            </div>
+        <!-- Two-column layout for desktop, single column for mobile -->
+        <div class="main-layout">
+            <!-- Left Column: Tasks, Projects, and Content -->
+            <div class="left-column">
+                <div class="content-area">
+                    <!-- Do Mode Content -->
+                    <div id="do-content" class="mode-content">
+                        <div id="focus-flow-content" class="focus-flow-content">
+                            <div class="loading">Loading your immediate focus tasks...</div>
+                        </div>
+                    </div>
 
-            <!-- Plan Mode Content -->
-            <div id="plan-content" class="mode-content hidden">
-                <div id="projects-content" class="projects-content">
-                    <div class="loading">Loading project hierarchy...</div>
-                </div>
-            </div>
+                    <!-- Plan Mode Content -->
+                    <div id="plan-content" class="mode-content hidden">
+                        <div id="projects-content" class="projects-content">
+                            <div class="loading">Loading project hierarchy...</div>
+                        </div>
+                    </div>
 
-            <!-- Reflect Mode Content -->
-            <div id="reflect-content" class="mode-content hidden">
-                <div id="momentum-content" class="momentum-content">
-                    <div class="loading">Loading momentum and insights...</div>
-                </div>
-                
-                <!-- Activity Feed -->
-                <div class="activity-section">
-                    <h3>⚡ Recent Activity</h3>
-                    <div id="activity-content" class="activity-content">
-                        <div class="activity-item">
-                            <div class="activity-time">Just now</div>
-                            <div class="activity-description">Dashboard connected</div>
+                    <!-- Reflect Mode Content -->
+                    <div id="reflect-content" class="mode-content hidden">
+                        <div id="momentum-content" class="momentum-content">
+                            <div class="loading">Loading momentum and insights...</div>
+                        </div>
+                        
+                        <!-- Activity Feed -->
+                        <div class="activity-section">
+                            <h3>⚡ Recent Activity</h3>
+                            <div id="activity-content" class="activity-content">
+                                <div class="activity-item">
+                                    <div class="activity-time">Just now</div>
+                                    <div class="activity-description">Dashboard connected</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projects Mode Content -->
+                    <div id="projects-content" class="mode-content hidden">
+                        <div class="projects-header">
+                            <h2>Project Management</h2>
+                            <button id="create-project-btn" class="create-project-btn">➕ Create New Project</button>
+                        </div>
+                        <div id="projects-list" class="projects-list">
+                            <div class="loading">Loading projects...</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Projects Mode Content -->
-            <div id="projects-content" class="mode-content hidden">
-                <div class="projects-header">
-                    <h2>Project Management</h2>
-                    <button id="create-project-btn" class="create-project-btn">➕ Create New Project</button>
+            <!-- Right Column: AI Tools and Chat -->
+            <div class="right-column">
+                <!-- AI Controls -->
+                <div class="ai-controls">
+                    <h3 class="column-title">🧠 AI Perspective</h3>
+                    <div class="ai-buttons-grid">
+                        <button id="ai-status-btn" class="ai-button">🧠 Status Analysis</button>
+                        <button id="ai-coordinate-btn" class="ai-button">🔗 Coordinate Tasks</button>
+                        <button id="ai-reflect-btn" class="ai-button">✨ Reflection</button>
+                    </div>
                 </div>
-                <div id="projects-list" class="projects-list">
-                    <div class="loading">Loading projects...</div>
+
+                <!-- Navigation Controls -->
+                <div class="navigation-controls">
+                    <h3 class="column-title">🛠️ Tools</h3>
+                    <div class="nav-buttons-grid">
+                        <button id="zoom-in-btn" class="nav-button">🔍 Zoom In</button>
+                        <button id="zoom-out-btn" class="nav-button">🔍 Zoom Out</button>
+                        <button id="workspace-init-btn" class="nav-button">🏗️ Init Workspace</button>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- AI Controls -->
-        <div class="ai-controls">
-            <button id="ai-status-btn" class="ai-button">🧠 AI Status Analysis</button>
-            <button id="ai-coordinate-btn" class="ai-button">🔗 Coordinate Tasks</button>
-            <button id="ai-reflect-btn" class="ai-button">✨ AI Reflection</button>
-        </div>
-
-        <!-- Navigation Controls -->
-        <div class="navigation-controls">
-            <button id="zoom-in-btn" class="nav-button">🔍 Zoom In</button>
-            <button id="zoom-out-btn" class="nav-button">🔍 Zoom Out</button>
-            <button id="workspace-init-btn" class="nav-button">🏗️ Init Workspace</button>
-        </div>
-
-        <!-- Chat Interface -->
-        <div class="chat-section">
-            <div class="chat-messages" id="chat-messages">
-                <!-- Messages will appear here -->
-            </div>
-            <!-- Progress Recording Form -->
-            <div class="progress-form">
-                <input type="text" class="progress-input" placeholder="Record progress: What did you accomplish?" id="progress-input" />
-                <button class="progress-btn" id="progress-btn">💾 Save Progress</button>
-            </div>
-            
-            <div class="chat-input-container">
-                <input type="text" class="chat-input" placeholder="Ask me anything..." id="chat-input" />
-                <button class="send-btn" id="send-btn">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                    </svg>
-                </button>
+                <!-- Chat Interface -->
+                <div class="chat-section">
+                    <h3 class="column-title">💬 AI Chat</h3>
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Messages will appear here -->
+                    </div>
+                    
+                    <!-- Progress Recording Form -->
+                    <div class="progress-form">
+                        <input type="text" class="progress-input" placeholder="Record progress: What did you accomplish?" id="progress-input" />
+                        <button class="progress-btn" id="progress-btn">💾 Save Progress</button>
+                    </div>
+                    
+                    <div class="chat-input-container">
+                        <input type="text" class="chat-input" placeholder="Ask me anything..." id="chat-input" />
+                        <button class="send-btn" id="send-btn">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
