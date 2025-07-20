@@ -16,7 +16,7 @@ const md = new MarkdownIt();
 const aiService = new WebDashboardAIService();
 
 const PORT = process.env.PORT || 3000;
-const WORKSPACE_PATH = path.join(__dirname, '../../workspace');
+const WORKSPACE_PATH = process.env.TEST_WORKSPACE_PATH || path.join(__dirname, '../../workspace');
 
 // Helper function to gather workspace context for AI analysis
 async function gatherWorkspaceContext() {

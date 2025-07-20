@@ -40,6 +40,7 @@
     "socket.io": "^4.7.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.1",
     "@types/jest": "^29.5.8",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.9.0",

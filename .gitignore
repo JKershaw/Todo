@@ -11,6 +11,12 @@ dist/
 # Coverage reports
 coverage/
 
+# Test artifacts
+test-results/
+tests/e2e/test-e2e-workspace/
+playwright-report/
+test-workspace/
+
 # Environment variables
 .env
 .env.local
