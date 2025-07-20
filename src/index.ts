@@ -16,6 +16,7 @@ import { zoomCommand } from './commands/zoom';
 import { reflectCommand } from './commands/reflect';
 import { projectCommand } from './commands/project';
 import { coordinateCommand } from './commands/coordinate';
+import { coordinateEnhancedCommand } from './commands/coordinate-enhanced';
 
 const program = new Command();
 
@@ -83,6 +84,15 @@ program
   .option('-d, --directory <dir>', 'Workspace directory', '.')
   .action(async (options) => {
     await coordinateCommand(options.directory);
+  });
+
+program
+  .command('coordinate-enhanced')
+  .description('Advanced AI-powered task relationship analysis with deep insights')
+  .option('-d, --directory <dir>', 'Workspace directory', '.')
+  .option('--basic', 'Use standard analysis instead of enhanced version')
+  .action(async (options) => {
+    await coordinateEnhancedCommand(options.directory, !options.basic);
   });
 
 // Handle unknown commands

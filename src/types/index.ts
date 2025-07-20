@@ -63,16 +63,18 @@ export interface TaskRelationship {
   description: string;
 }
 
+export interface PriorityAdjustment {
+  task: string;
+  current_priority: number;
+  suggested_priority: number;
+  reasoning: string;
+}
+
 export interface AITaskAnalysis {
   task_relationships: TaskRelationship[];
   coordination_suggestions: string[];
   optimization_opportunities: string[];
-  priority_adjustments: {
-    task: string;
-    current_priority: number;
-    suggested_priority: number;
-    reasoning: string;
-  }[];
+  priority_adjustments: PriorityAdjustment[];
 }
 
 export interface FileChange {
