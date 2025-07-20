@@ -221,9 +221,7 @@ const generateProjectFile = async (projectName: string, aiResponse: any, project
   const template = `# Project: ${projectName}
 
 **Status:** Active  
-**Level:** 2  
-**Started:** ${getCurrentDate()}  
-**Target:** (Set target date)
+**Level:** 2
 
 ## Goal
 ${aiResponse.analysis || 'Define the main goal and purpose of this project.'}

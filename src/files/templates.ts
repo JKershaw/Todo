@@ -1,16 +1,12 @@
-import { getCurrentDate, getTargetDate } from '../core/utils';
+// Date utilities removed - focusing on progress over arbitrary deadlines
 
 interface TemplateVariables {
-  date: string;
-  targetDate: string;
   activeProjects: number;
   daysSinceReflect: number;
 }
 
 export const renderTemplate = (template: string, variables: Partial<TemplateVariables> = {}): string => {
   const defaultVars: TemplateVariables = {
-    date: getCurrentDate(),
-    targetDate: getTargetDate(),
     activeProjects: 0,
     daysSinceReflect: 0,
     ...variables
@@ -112,9 +108,7 @@ zoom:
 export const BOOTSTRAP_PROJECT_TEMPLATE = `# Project: Build Productivity System
 
 **Status:** Active  
-**Level:** 2  
-**Started:** {{date}}  
-**Target:** {{targetDate}}  
+**Level:** 2
 
 ## Goal
 Create a minimal, markdown-based, local-first productivity system that uses AI transparently to help manage tasks across scale levels (0-4).

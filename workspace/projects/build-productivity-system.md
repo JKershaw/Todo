@@ -1,9 +1,7 @@
 # Project: Build Productivity System
 
 **Status:** Active  
-**Level:** 2  
-**Started:** 2025-07-19  
-**Target:** 2025-08-18  
+**Level:** 2
 
 ## Goal
 Create a minimal, markdown-based, local-first productivity system that uses AI transparently to help manage tasks across scale levels (0-4).

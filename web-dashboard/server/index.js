@@ -921,9 +921,7 @@ app.post('/api/projects/create', async (req, res) => {
     const projectTemplate = `# Project: ${name}
 
 **Status:** Active  
-**Level:** ${level || 2}  
-**Started:** ${new Date().toISOString().split('T')[0]}  
-**Target:** (Set target date)
+**Level:** ${level || 2}
 
 ## Goal
 ${goal}

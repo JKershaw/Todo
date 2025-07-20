@@ -1,9 +1,7 @@
 # Project: Developer Self-Improvement Toolkit
 
 **Status:** Active  
-**Level:** 2  
-**Started:** 2025-07-20  
-**Target:** 2025-10-20  
+**Level:** 2
 
 ## Goal
 Build a comprehensive developer toolkit that makes building software simpler, safer, and more efficient through automation, AI assistance, and best practices enforcement.
