@@ -12,6 +12,7 @@ import chalk from 'chalk';
 import { initCommand } from './commands/init';
 import { statusCommand } from './commands/status';
 import { saveCommand } from './commands/save';
+import { saveEnhancedCommand } from './commands/save-enhanced';
 import { zoomCommand } from './commands/zoom';
 import { reflectCommand } from './commands/reflect';
 import { projectCommand } from './commands/project';
@@ -48,6 +49,21 @@ program
   .option('-d, --directory <dir>', 'Workspace directory', '.')
   .action(async (description, options) => {
     await saveCommand(description, options.directory);
+  });
+
+program
+  .command('save-ai')
+  .argument('<description>', 'Description of completed work or progress')
+  .description('Enhanced save with AI Action Executor for autonomous improvements')
+  .option('-d, --directory <dir>', 'Workspace directory', '.')
+  .option('--dry-run', 'Show what would be done without making changes')
+  .option('--auto-approve', 'Automatically apply safe improvements without prompting')
+  .action(async (description, options) => {
+    await saveEnhancedCommand(description, options.directory, {
+      dryRun: options.dryRun,
+      autoApprove: options.autoApprove,
+      useExecutor: true
+    });
   });
 
 program
