@@ -7,6 +7,9 @@ test.describe('UI Verification Tests', () => {
   });
 
   test('should load dashboard with correct layout and mode switcher', async ({ page }) => {
+    // Take screenshot for UI analysis
+    await page.screenshot({ path: 'test-results/ui-analysis-dashboard-load.png', fullPage: true });
+    
     // Check main header elements
     await expect(page.locator('.app-title')).toContainText('Focus');
     await expect(page.locator('#connection-status')).toBeVisible();
@@ -26,21 +29,25 @@ test.describe('UI Verification Tests', () => {
     // Start in Do mode (default)
     await expect(page.locator('#do-content')).toBeVisible();
     await expect(page.locator('#plan-content')).toHaveClass(/hidden/);
+    await page.screenshot({ path: 'test-results/ui-analysis-mode-do.png' });
 
     // Switch to Plan mode
     await page.click('[data-mode="plan"]');
     await expect(page.locator('#plan-content')).toBeVisible();
     await expect(page.locator('#do-content')).toHaveClass(/hidden/);
+    await page.screenshot({ path: 'test-results/ui-analysis-mode-plan.png' });
 
     // Switch to Reflect mode
     await page.click('[data-mode="reflect"]');
     await expect(page.locator('#reflect-content')).toBeVisible();
     await expect(page.locator('#plan-content')).toHaveClass(/hidden/);
+    await page.screenshot({ path: 'test-results/ui-analysis-mode-reflect.png' });
 
     // Switch to Projects mode
     await page.click('[data-mode="projects"]');
     await expect(page.locator('#projects-content')).toBeVisible();
     await expect(page.locator('#reflect-content')).toHaveClass(/hidden/);
+    await page.screenshot({ path: 'test-results/ui-analysis-mode-projects.png' });
   });
 
   test('should have all AI control buttons', async ({ page }) => {
