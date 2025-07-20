@@ -595,6 +595,18 @@ class ProductivityDashboard {
     const aiStatusBtn = document.getElementById('ai-status-btn');
     const chatMessages = document.getElementById('chat-messages');
     
+    // Check if required elements exist
+    if (!aiStatusBtn) {
+      console.error('AI Status button not found');
+      return;
+    }
+    
+    if (!chatMessages) {
+      console.error('Chat messages container not found');
+      alert('Error: Chat interface not available. Please refresh the page.');
+      return;
+    }
+    
     // Show loading state
     aiStatusBtn.classList.add('loading');
     aiStatusBtn.textContent = '🔄 Analyzing...';
@@ -610,21 +622,26 @@ class ProductivityDashboard {
         body: JSON.stringify({})
       });
       
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       
-      if (data.success) {
+      const data = await response.json();
+      console.log('AI Status Response:', data);
+      
+      if (data.success && data.analysis) {
         // Display AI analysis in chat
         const analysisMessage = document.createElement('div');
         analysisMessage.className = 'chat-message ai-message';
         analysisMessage.innerHTML = `
           <strong>🧠 AI Status Analysis:</strong>
-          <p><strong>Analysis:</strong> ${this.escapeHtml(data.analysis.analysis)}</p>
+          <p><strong>Analysis:</strong> ${this.escapeHtml(data.analysis.analysis || 'No analysis provided')}</p>
           <p><strong>Suggestions:</strong></p>
           <ul>
-            ${data.analysis.suggestions.map(s => `<li>${this.escapeHtml(s)}</li>`).join('')}
+            ${(data.analysis.suggestions || []).map(s => `<li>${this.escapeHtml(s)}</li>`).join('')}
           </ul>
-          <p><strong>Reasoning:</strong> ${this.escapeHtml(data.analysis.reasoning)}</p>
-          <small style="opacity: 0.7;">AI Service: ${data.aiService.provider} (${data.aiService.model})</small>
+          <p><strong>Reasoning:</strong> ${this.escapeHtml(data.analysis.reasoning || 'No reasoning provided')}</p>
+          <small style="opacity: 0.7;">AI Service: ${data.aiService?.provider || 'unknown'} (${data.aiService?.model || 'unknown'})</small>
         `;
         
         chatMessages.appendChild(analysisMessage);
@@ -639,16 +656,20 @@ class ProductivityDashboard {
     } catch (error) {
       console.error('AI status analysis error:', error);
       
-      // Display error in chat
-      const errorMessage = document.createElement('div');
-      errorMessage.className = 'chat-message ai-message';
-      errorMessage.innerHTML = `
-        <strong>⚠️ AI Analysis Error:</strong>
-        <p>Failed to get AI analysis: ${this.escapeHtml(error.message)}</p>
-      `;
-      
-      chatMessages.appendChild(errorMessage);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      // Display error in chat - check if chatMessages exists first
+      if (chatMessages) {
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'chat-message ai-message';
+        errorMessage.innerHTML = `
+          <strong>⚠️ AI Analysis Error:</strong>
+          <p>Failed to get AI analysis: ${this.escapeHtml(error.message)}</p>
+        `;
+        
+        chatMessages.appendChild(errorMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      } else {
+        alert(`AI Analysis Error: ${error.message}`);
+      }
       
     } finally {
       // Reset button state
@@ -660,6 +681,18 @@ class ProductivityDashboard {
   async handleAICoordination() {
     const aiCoordinateBtn = document.getElementById('ai-coordinate-btn');
     const chatMessages = document.getElementById('chat-messages');
+    
+    // Check if required elements exist
+    if (!aiCoordinateBtn) {
+      console.error('AI Coordinate button not found');
+      return;
+    }
+    
+    if (!chatMessages) {
+      console.error('Chat messages container not found');
+      alert('Error: Chat interface not available. Please refresh the page.');
+      return;
+    }
     
     // Show loading state
     aiCoordinateBtn.classList.add('loading');
@@ -676,9 +709,14 @@ class ProductivityDashboard {
         body: JSON.stringify({})
       });
       
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       
-      if (data.success) {
+      const data = await response.json();
+      console.log('AI Coordination Response:', data);
+      
+      if (data.success && data.analysis) {
         // Display task relationships
         let relationshipsHtml = '';
         if (data.analysis.task_relationships && data.analysis.task_relationships.length > 0) {
@@ -705,13 +743,13 @@ class ProductivityDashboard {
           ${relationshipsHtml}
           <p><strong>💡 Suggestions:</strong></p>
           <ul>
-            ${data.analysis.coordination_suggestions.map(s => `<li>${this.escapeHtml(s)}</li>`).join('')}
+            ${(data.analysis.coordination_suggestions || []).map(s => `<li>${this.escapeHtml(s)}</li>`).join('')}
           </ul>
           <p><strong>⚡ Optimization Opportunities:</strong></p>
           <ul>
-            ${data.analysis.optimization_opportunities.map(o => `<li>${this.escapeHtml(o)}</li>`).join('')}
+            ${(data.analysis.optimization_opportunities || []).map(o => `<li>${this.escapeHtml(o)}</li>`).join('')}
           </ul>
-          <small style="opacity: 0.7;">AI Service: ${data.aiService.provider} (${data.aiService.model})</small>
+          <small style="opacity: 0.7;">AI Service: ${data.aiService?.provider || 'unknown'} (${data.aiService?.model || 'unknown'})</small>
         `;
         
         chatMessages.appendChild(coordinationMessage);
@@ -726,16 +764,20 @@ class ProductivityDashboard {
     } catch (error) {
       console.error('AI coordination error:', error);
       
-      // Display error in chat
-      const errorMessage = document.createElement('div');
-      errorMessage.className = 'chat-message ai-message';
-      errorMessage.innerHTML = `
-        <strong>⚠️ AI Coordination Error:</strong>
-        <p>Failed to get task coordination: ${this.escapeHtml(error.message)}</p>
-      `;
-      
-      chatMessages.appendChild(errorMessage);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      // Display error in chat - check if chatMessages exists first
+      if (chatMessages) {
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'chat-message ai-message';
+        errorMessage.innerHTML = `
+          <strong>⚠️ AI Coordination Error:</strong>
+          <p>Failed to get task coordination: ${this.escapeHtml(error.message)}</p>
+        `;
+        
+        chatMessages.appendChild(errorMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      } else {
+        alert(`AI Coordination Error: ${error.message}`);
+      }
       
     } finally {
       // Reset button state
@@ -766,6 +808,19 @@ class ProductivityDashboard {
     const progressBtn = document.getElementById('progress-btn');
     const progressInput = document.getElementById('progress-input');
     const chatMessages = document.getElementById('chat-messages');
+    
+    // Check if required elements exist
+    if (!progressBtn || !progressInput) {
+      console.error('Progress form elements not found');
+      alert('Error: Progress form not available. Please refresh the page.');
+      return;
+    }
+    
+    if (!chatMessages) {
+      console.error('Chat messages container not found');
+      alert('Error: Chat interface not available. Please refresh the page.');
+      return;
+    }
     
     const description = progressInput.value.trim();
     if (!description) {
