@@ -1475,8 +1475,9 @@ class ProductivityDashboard {
                 <button class="project-btn" onclick="dashboard.editProject('${project.name}')">✏️ Edit</button>
                 <button class="project-btn" onclick="dashboard.archiveProject('${project.name}')">📦 Archive</button>
               </div>
-          </div>
-        `).join('');
+            </div>
+          `;
+        }).join('');
         
         projectsList.innerHTML = projectsHtml;
         
