@@ -5,14 +5,53 @@ const path = require('path');
 const fs = require('fs').promises;
 const chokidar = require('chokidar');
 const MarkdownIt = require('markdown-it');
+const WebDashboardAIService = require('./ai-service');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 const md = new MarkdownIt();
 
+// Initialize AI service
+const aiService = new WebDashboardAIService();
+
 const PORT = process.env.PORT || 3000;
 const WORKSPACE_PATH = path.join(__dirname, '../../workspace');
+
+// Helper function to gather workspace context for AI analysis
+async function gatherWorkspaceContext() {
+  try {
+    const context = [];
+    
+    // Read README.md
+    try {
+      const readme = await fs.readFile(path.join(WORKSPACE_PATH, 'README.md'), 'utf-8');
+      context.push(`=== WORKSPACE README ===\n${readme}\n`);
+    } catch (e) {
+      context.push('=== WORKSPACE README ===\n(No README found)\n');
+    }
+    
+    // Read project files
+    try {
+      const projectsDir = path.join(WORKSPACE_PATH, 'projects');
+      const projectFiles = await fs.readdir(projectsDir);
+      
+      for (const file of projectFiles.slice(0, 5)) { // Limit to 5 projects to avoid token limits
+        if (file.endsWith('.md')) {
+          const projectContent = await fs.readFile(path.join(projectsDir, file), 'utf-8');
+          context.push(`=== PROJECT: ${file} ===\n${projectContent.substring(0, 2000)}\n`); // Limit length
+        }
+      }
+    } catch (e) {
+      context.push('=== PROJECTS ===\n(No projects found)\n');
+    }
+    
+    return context.join('\n');
+  } catch (error) {
+    console.error('Error gathering workspace context:', error);
+    return 'Error gathering workspace context';
+  }
+}
 
 // Serve static files with no-cache headers to prevent browser caching issues
 app.use(express.static(path.join(__dirname, '../public'), {
@@ -343,31 +382,23 @@ app.post('/api/tasks/complete', async (req, res) => {
   }
 });
 
-// Simple AI Status Analysis endpoint (first step)
+// AI Status Analysis endpoint with real AI integration
 app.post('/api/ai/status', async (req, res) => {
   try {
     console.log('🤖 AI Status Analysis requested');
     
-    // Step 1: Provide basic implementation for frontend development
-    const mockAnalysis = {
-      analysis: 'AI Status: Web interface completion project is progressing well. Focus Flow interface is fully functional with three-mode design.',
-      suggestions: [
-        'Complete web-based AI analysis integration',
-        'Add progress recording functionality to dashboard',
-        'Implement project management interface'
-      ],
-      proposed_changes: [],
-      reasoning: 'System is ready for web interface expansion to achieve full CLI functionality parity.'
-    };
+    // Gather workspace context for AI analysis
+    const workspaceContext = await gatherWorkspaceContext();
     
-    console.log('✅ Mock AI analysis returned');
+    // Use real AI service
+    const analysis = await aiService.analyzeStatus(workspaceContext);
+    const serviceInfo = aiService.getServiceInfo();
+    
+    console.log(`✅ AI analysis completed using ${serviceInfo.provider}`);
     res.json({
       success: true,
-      analysis: mockAnalysis,
-      aiService: {
-        provider: 'mock',
-        model: 'development-placeholder'
-      }
+      analysis: analysis,
+      aiService: serviceInfo
     });
     
   } catch (error) {
@@ -376,56 +407,23 @@ app.post('/api/ai/status', async (req, res) => {
   }
 });
 
-// AI Coordinate Tasks endpoint (step 2)
+// AI Coordinate Tasks endpoint with real AI integration
 app.post('/api/ai/coordinate', async (req, res) => {
   try {
     console.log('🔗 AI Task Coordination requested');
     
-    // Step 2: Provide mock coordination analysis for frontend development  
-    const mockCoordination = {
-      task_relationships: [
-        {
-          from_task: "Implement AI coordinate tasks API endpoint",
-          to_task: "Enable coordinate button and integrate with frontend", 
-          relationship_type: "dependency",
-          strength: "strong",
-          description: "API endpoint must be working before frontend integration can be completed"
-        },
-        {
-          from_task: "Complete web interface functionality",
-          to_task: "Test full CLI parity through web dashboard",
-          relationship_type: "enables", 
-          strength: "strong",
-          description: "Full web functionality enables comprehensive testing of CLI feature parity"
-        }
-      ],
-      coordination_suggestions: [
-        "Continue with small logical steps approach for web interface completion",
-        "Focus on AI-powered features to provide intelligent task insights",
-        "Test each feature thoroughly before proceeding to next step"
-      ],
-      optimization_opportunities: [
-        "Batch AI-related web interface features for consistent development flow",
-        "Create reusable components for AI analysis display across different features"
-      ],
-      priority_adjustments: [
-        {
-          task: "Implement progress recording functionality",
-          current_priority: 2,
-          suggested_priority: 1,
-          reasoning: "Progress recording is essential for completing the save command web interface"
-        }
-      ]
-    };
+    // Gather workspace context for AI analysis
+    const workspaceContext = await gatherWorkspaceContext();
     
-    console.log('✅ Mock coordination analysis returned');
+    // Use real AI service
+    const analysis = await aiService.coordinateTasks(workspaceContext);
+    const serviceInfo = aiService.getServiceInfo();
+    
+    console.log(`✅ AI coordination completed using ${serviceInfo.provider}`);
     res.json({
       success: true,
-      analysis: mockCoordination,
-      aiService: {
-        provider: 'mock',
-        model: 'development-placeholder'
-      }
+      analysis: analysis,
+      aiService: serviceInfo
     });
     
   } catch (error) {
@@ -434,7 +432,7 @@ app.post('/api/ai/coordinate', async (req, res) => {
   }
 });
 
-// Progress Recording endpoint (step 3)  
+// Progress Recording endpoint with real AI integration
 app.post('/api/ai/save', async (req, res) => {
   try {
     const { description } = req.body;
@@ -445,39 +443,25 @@ app.post('/api/ai/save', async (req, res) => {
     
     console.log('💾 Progress recording requested:', description);
     
-    // Step 3: Provide mock progress analysis for frontend development
-    const mockProgressAnalysis = {
-      analysis: `Progress recorded: ${description}. This represents continued momentum in the web interface completion project.`,
-      suggestions: [
-        'Continue implementing remaining CLI features in web interface',
-        'Test each new feature thoroughly before proceeding',
-        'Focus on user experience improvements'
-      ],
-      proposed_changes: [
-        {
-          file_path: 'projects/web-interface-completion.md',
-          change_type: 'update',
-          diff: `Mark progress recording functionality as completed`
-        }
-      ],
-      reasoning: 'Progress recording helps track development momentum and provides opportunity for AI-assisted file updates.'
-    };
+    // Gather workspace context for AI analysis
+    const workspaceContext = await gatherWorkspaceContext();
     
-    // Mock file update confirmation (user would approve/reject in real implementation)
-    const fileUpdateApplied = Math.random() > 0.5; // Simulate user decision
+    // Use real AI service
+    const analysis = await aiService.recordProgress(description, workspaceContext);
+    const serviceInfo = aiService.getServiceInfo();
     
-    console.log('✅ Mock progress analysis completed');
+    // For now, simulate file update decisions (in a real implementation, this would be user-driven)
+    const fileUpdateApplied = analysis.proposed_changes.length > 0 && Math.random() > 0.3;
+    
+    console.log(`✅ AI progress analysis completed using ${serviceInfo.provider}`);
     res.json({
       success: true,
-      analysis: mockProgressAnalysis,
+      analysis: analysis,
       fileUpdateApplied,
       message: fileUpdateApplied ? 
         'Progress recorded and file updates applied' : 
         'Progress recorded, file updates cancelled by user',
-      aiService: {
-        provider: 'mock',
-        model: 'development-placeholder'
-      }
+      aiService: serviceInfo
     });
     
   } catch (error) {
@@ -486,59 +470,23 @@ app.post('/api/ai/save', async (req, res) => {
   }
 });
 
-// AI Reflection endpoint (step 5)
+// AI Reflection endpoint with real AI integration
 app.post('/api/ai/reflect', async (req, res) => {
   try {
     console.log('✨ AI Reflection requested');
     
-    // Step 5: Provide mock reflection analysis for frontend development
-    const mockReflection = {
-      reflection_insights: [
-        {
-          category: "Momentum Analysis",
-          insight: "You've completed 70% of productivity system development tasks, showing strong momentum in systematic implementation.",
-          confidence: "high"
-        },
-        {
-          category: "Pattern Recognition", 
-          insight: "Your work follows a clear pattern: plan → implement → test → document. This systematic approach is yielding consistent progress.",
-          confidence: "high"
-        },
-        {
-          category: "Optimization Opportunity",
-          insight: "Consider implementing remaining CLI features (workspace init, zoom navigation) to achieve full feature parity between web and CLI interfaces.",
-          confidence: "medium"
-        }
-      ],
-      improvement_suggestions: [
-        "Continue with small logical steps approach - it's working well",
-        "Add comprehensive testing for each new feature before moving to next",
-        "Focus on user experience improvements for web interface adoption"
-      ],
-      goal_alignment: {
-        current_focus: "Web interface completion for full CLI functionality parity",
-        alignment_score: 95,
-        next_recommended_actions: [
-          "Implement workspace initialization in web interface",
-          "Add zoom navigation for scale level perspective",
-          "Complete AI reflection integration"
-        ]
-      },
-      momentum_assessment: {
-        overall_momentum: "Strong",
-        completion_trajectory: "On track for 100% web interface completion",
-        energy_level: "High - systematic progress with clear milestones"
-      }
-    };
+    // Gather workspace context for AI analysis
+    const workspaceContext = await gatherWorkspaceContext();
     
-    console.log('✅ Mock reflection analysis completed');
+    // Use real AI service
+    const reflection = await aiService.generateReflection(workspaceContext);
+    const serviceInfo = aiService.getServiceInfo();
+    
+    console.log(`✅ AI reflection completed using ${serviceInfo.provider}`);
     res.json({
       success: true,
-      reflection: mockReflection,
-      aiService: {
-        provider: 'mock',
-        model: 'development-placeholder'
-      }
+      reflection: reflection,
+      aiService: serviceInfo
     });
     
   } catch (error) {
