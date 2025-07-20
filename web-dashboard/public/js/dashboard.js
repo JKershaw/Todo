@@ -1419,33 +1419,62 @@ class ProductivityDashboard {
     try {
       console.log('📋 Loading projects list');
       
+      const projectsList = document.getElementById('projects-list');
+      projectsList.innerHTML = '<div class="loading">Loading projects...</div>';
+      
       const response = await fetch('/api/projects/list');
       const data = await response.json();
       
-      const projectsList = document.getElementById('projects-list');
-      
       if (data.success && data.projects && data.projects.length > 0) {
-        const projectsHtml = data.projects.map(project => `
-          <div class="project-card">
-            <div class="project-card-header">
-              <h3 class="project-title">${this.escapeHtml(project.displayName)}</h3>
-              <span class="project-status">${this.escapeHtml(project.status)}</span>
-            </div>
-            <p class="project-goal">${this.escapeHtml(project.goal)}</p>
-            <div class="project-progress">
-              <div class="project-progress-label">
-                <span>Progress</span>
-                <span>${project.completionRate}%</span>
+        // Sort projects by status and completion rate
+        const sortedProjects = data.projects.sort((a, b) => {
+          // Active projects first, then by completion rate
+          if (a.status === 'Active' && b.status !== 'Active') return -1;
+          if (b.status === 'Active' && a.status !== 'Active') return 1;
+          return b.completionRate - a.completionRate;
+        });
+        
+        const projectsHtml = sortedProjects.map(project => {
+          const statusClass = project.status.toLowerCase();
+          const progressColor = project.completionRate >= 80 ? '#10b981' : 
+                               project.completionRate >= 50 ? '#f59e0b' : '#ef4444';
+          
+          return `
+            <div class="project-card">
+              <div class="project-card-header">
+                <h3 class="project-title">${this.escapeHtml(project.displayName)}</h3>
+                <span class="project-status ${statusClass}">${this.escapeHtml(project.status)}</span>
               </div>
-              <div class="project-progress-bar">
-                <div class="project-progress-fill" style="width: ${project.completionRate}%"></div>
+              <p class="project-goal">${this.escapeHtml(project.goal || 'No goal specified')}</p>
+              
+              ${project.level4Connection ? `
+                <div class="project-connection">
+                  <strong>🎯 Life Goal:</strong> ${this.escapeHtml(project.level4Connection)}
+                </div>
+              ` : ''}
+              
+              <div class="project-progress">
+                <div class="project-progress-label">
+                  <span>Progress</span>
+                  <span>${project.completionRate}%</span>
+                </div>
+                <div class="project-progress-bar">
+                  <div class="project-progress-fill" style="width: ${project.completionRate}%; background: ${progressColor}"></div>
+                </div>
               </div>
-            </div>
-            <div class="project-actions">
-              <button class="project-btn" onclick="dashboard.viewProject('${project.name}')">📋 View Tasks</button>
-              <button class="project-btn" onclick="dashboard.editProject('${project.name}')">✏️ Edit</button>
-              <button class="project-btn" onclick="dashboard.archiveProject('${project.name}')">📦 Archive</button>
-            </div>
+              
+              ${project.level0Count || project.level1Count ? `
+                <div class="project-tasks-summary">
+                  ${project.level0Count ? `<span class="task-count urgent">🔴 ${project.level0Count} urgent</span>` : ''}
+                  ${project.level1Count ? `<span class="task-count">📋 ${project.level1Count} this week</span>` : ''}
+                </div>
+              ` : ''}
+              
+              <div class="project-actions">
+                <button class="project-btn" onclick="dashboard.viewProject('${project.name}')">📋 View Tasks</button>
+                <button class="project-btn" onclick="dashboard.editProject('${project.name}')">✏️ Edit</button>
+                <button class="project-btn" onclick="dashboard.archiveProject('${project.name}')">📦 Archive</button>
+              </div>
           </div>
         `).join('');
         
@@ -1454,8 +1483,12 @@ class ProductivityDashboard {
       } else {
         projectsList.innerHTML = `
           <div class="empty-state">
+            <div class="empty-state-icon">📂</div>
             <h3>No projects found</h3>
-            <p>Create your first project to start organizing your work!</p>
+            <p>Create your first project to start organizing your work into meaningful goals!</p>
+            <button class="create-project-btn" onclick="document.getElementById('create-project-btn').click()">
+              ➕ Create Your First Project
+            </button>
           </div>
         `;
       }

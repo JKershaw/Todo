@@ -1364,6 +1364,28 @@ body {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* Custom scrollbar for projects list */
+.projects-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.projects-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.projects-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.projects-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .project-card {
@@ -1374,6 +1396,10 @@ body {
   padding: 20px;
   box-shadow: var(--shadow);
   transition: all 0.2s ease;
+  position: relative;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .project-card:hover {
@@ -1397,11 +1423,28 @@ body {
 
 .project-status {
   padding: 4px 8px;
-  background: var(--success-color);
-  color: white;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.project-status.active {
+  background: var(--success-color);
+}
+
+.project-status.completed {
+  background: #10b981;
+}
+
+.project-status.paused {
+  background: #f59e0b;
+}
+
+.project-status.archived {
+  background: #6b7280;
 }
 
 .project-goal {
@@ -1441,7 +1484,8 @@ body {
 .project-actions {
   display: flex;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: auto;
+  padding-top: 16px;
 }
 
 .project-btn {
@@ -1459,6 +1503,112 @@ body {
 .project-btn:hover {
   background: rgba(255, 255, 255, 1);
   border-color: var(--primary-color);
+}
+
+/* Enhanced Project Card Elements */
+.project-connection {
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--primary-color);
+}
+
+.project-tasks-summary {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.task-count {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.task-count.urgent {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+/* Empty State Improvements */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 2px dashed var(--border-color);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty-state h3 {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* Loading State Improvements */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.loading::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-top: 2px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mobile responsiveness for projects */
+@media (max-width: 768px) {
+  .projects-list {
+    grid-template-columns: 1fr;
+    max-height: calc(100vh - 160px);
+  }
+  
+  .project-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .project-btn {
+    width: 100%;
+  }
+  
+  .project-tasks-summary {
+    justify-content: center;
+  }
 }
 
 /* Modal Styles */

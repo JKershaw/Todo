@@ -620,6 +620,7 @@ app.get('/api/projects/list', async (req, res) => {
       let goal = '';
       
       // Parse project metadata
+      let level4Connection = '';
       for (const line of lines) {
         if (line.startsWith('**Status:**')) {
           status = line.replace('**Status:**', '').trim();
@@ -633,14 +634,37 @@ app.get('/api/projects/list', async (req, res) => {
             goal = lines[goalIndex + 1].trim();
           }
         }
+        if (line.startsWith('## Level 4 Connection')) {
+          const connectionIndex = lines.indexOf(line);
+          if (connectionIndex !== -1 && lines[connectionIndex + 1]) {
+            level4Connection = lines[connectionIndex + 1].trim();
+          }
+        }
       }
       
-      // Count tasks
+      // Count tasks by level
       let totalTasks = 0;
       let completedTasks = 0;
+      let level0Count = 0;
+      let level1Count = 0;
+      let currentLevel = null;
       
       for (const line of lines) {
-        if (line.includes('- [ ]')) totalTasks++;
+        // Track current section level
+        if (line.startsWith('## Level 0')) {
+          currentLevel = 0;
+        } else if (line.startsWith('## Level 1')) {
+          currentLevel = 1;
+        } else if (line.startsWith('## Level 2')) {
+          currentLevel = 2;
+        }
+        
+        // Count tasks
+        if (line.includes('- [ ]')) {
+          totalTasks++;
+          if (currentLevel === 0) level0Count++;
+          if (currentLevel === 1) level1Count++;
+        }
         if (line.includes('- [x]')) {
           totalTasks++;
           completedTasks++;
@@ -653,9 +677,12 @@ app.get('/api/projects/list', async (req, res) => {
         status,
         level,
         goal: goal || 'No goal specified',
+        level4Connection: level4Connection || null,
         totalTasks,
         completedTasks,
         completionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+        level0Count,
+        level1Count,
         file
       });
     }
