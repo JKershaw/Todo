@@ -51,8 +51,7 @@ export const getWorkspaceFiles = (workspaceDir: string): WorkspaceFiles => {
     reflect: path.join(workspaceDir, 'reflect.md'),
     config: path.join(workspaceDir, 'config.yml'),
     projects_dir: path.join(workspaceDir, 'projects'),
-    areas_dir: path.join(workspaceDir, 'areas'),
-    system_dir: path.join(workspaceDir, 'system')
+    areas_dir: path.join(workspaceDir, 'areas')
   };
 };
 

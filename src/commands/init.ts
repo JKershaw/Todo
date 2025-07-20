@@ -12,9 +12,7 @@ import {
   PLAN_TEMPLATE,
   REFLECT_TEMPLATE,
   CONFIG_TEMPLATE,
-  BOOTSTRAP_PROJECT_TEMPLATE,
-  SYSTEM_BACKLOG_TEMPLATE,
-  SYSTEM_CHANGELOG_TEMPLATE
+  BOOTSTRAP_PROJECT_TEMPLATE
 } from '../files/templates';
 
 export const initCommand = async (directory: string): Promise<void> => {
@@ -35,7 +33,6 @@ export const initCommand = async (directory: string): Promise<void> => {
     // Create directory structure
     await ensureDirectory(files.projects_dir);
     await ensureDirectory(files.areas_dir);
-    await ensureDirectory(files.system_dir);
     
     // Create core files
     await writeFile(files.readme, renderTemplate(README_TEMPLATE));
@@ -47,12 +44,6 @@ export const initCommand = async (directory: string): Promise<void> => {
     const bootstrapProjectPath = path.join(files.projects_dir, 'build-productivity-system.md');
     await writeFile(bootstrapProjectPath, renderTemplate(BOOTSTRAP_PROJECT_TEMPLATE));
     
-    // Create system development files
-    const backlogPath = path.join(files.system_dir, 'backlog.md');
-    const changelogPath = path.join(files.system_dir, 'changelog.md');
-    await writeFile(backlogPath, renderTemplate(SYSTEM_BACKLOG_TEMPLATE));
-    await writeFile(changelogPath, renderTemplate(SYSTEM_CHANGELOG_TEMPLATE));
-    
     // Success message
     console.log(chalk.green('\n✓ Productivity system initialized successfully!'));
     console.log(chalk.white('\nFiles created:'));
@@ -61,8 +52,6 @@ export const initCommand = async (directory: string): Promise<void> => {
     console.log(chalk.gray(`  ${files.reflect}`));
     console.log(chalk.gray(`  ${files.config}`));
     console.log(chalk.gray(`  ${bootstrapProjectPath}`));
-    console.log(chalk.gray(`  ${backlogPath}`));
-    console.log(chalk.gray(`  ${changelogPath}`));
     
     console.log(chalk.blue('\nNext steps:'));
     console.log(chalk.white('  1. Review and edit config.yml for your preferences'));

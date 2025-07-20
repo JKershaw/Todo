@@ -106,5 +106,4 @@ export interface WorkspaceFiles {
   config: string;
   projects_dir: string;
   areas_dir: string;
-  system_dir: string;
 }

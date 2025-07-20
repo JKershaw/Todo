@@ -150,47 +150,4 @@ Build tools that amplify human thinking without replacing human judgment.
 This project demonstrates the system managing its own development - the ultimate dogfooding test.
 `;
 
-export const SYSTEM_BACKLOG_TEMPLATE = `# System Development Backlog
-
-**Last Updated:** {{date}}
-
-## High Priority
-- [ ] Core command implementation
-- [ ] AI integration stability
-- [ ] Error handling improvements
-
-## Medium Priority
-- [ ] Additional AI providers support
-- [ ] Advanced reflection features
-- [ ] Habit tracking integration
-
-## Low Priority
-- [ ] Web interface exploration
-- [ ] Mobile companion app
-- [ ] Advanced analytics
-
-## Completed
-- [x] Initial system architecture
-- [x] File structure design
-`;
-
-export const SYSTEM_CHANGELOG_TEMPLATE = `# System Development Changelog
-
-## v1.0.0 - {{date}}
-### Added
-- Initial system architecture
-- Core command framework
-- AI integration foundation
-- Template system
-- File structure management
-
-### Changed
-- N/A
-
-### Fixed
-- N/A
-
----
-
-*Future changes will be logged above*
-`;
+// System development templates removed - using proper project management instead
