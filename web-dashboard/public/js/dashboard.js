@@ -425,28 +425,14 @@ class ProductivityDashboard {
 
   async loadProjectsData() {
     try {
-      const response = await fetch('/api/projects');
-      const data = await response.json();
-      
-      const projectsContent = document.getElementById('projects-content');
-      
-      if (data.projects && data.projects.length > 0) {
-        const projectsHtml = data.projects.map(project => `
-          <div class="project-item">
-            <div class="project-title">${this.escapeHtml(project.name)}</div>
-            <div class="project-status ${project.status.toLowerCase()}">${project.status}</div>
-            <div class="project-preview">${this.escapeHtml(project.preview)}</div>
-          </div>
-        `).join('');
-        
-        projectsContent.innerHTML = projectsHtml;
-      } else {
-        projectsContent.innerHTML = '<div class="loading">No active projects found</div>';
+      // Only refresh projects list if we're actually in projects mode
+      const currentMode = document.querySelector('.mode-btn.active')?.dataset.mode;
+      if (currentMode === 'projects') {
+        // Call the proper projects list function instead of loading raw data
+        await this.loadProjectsList();
       }
     } catch (error) {
       console.error('Error loading projects data:', error);
-      const projectsContent = document.getElementById('projects-content');
-      projectsContent.innerHTML = '<div class="loading">Failed to load projects</div>';
     }
   }
 
